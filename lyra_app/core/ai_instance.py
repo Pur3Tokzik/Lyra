@@ -6,6 +6,8 @@ This is a core domain model that represents the AI's persistent state.
 
 from datetime import datetime
 from typing import Optional
+from memory.memory_system import MemorySystem
+from model.model_interface import ModelInterface
 
 class Identity:
     """Represents the identity aspects of an AI."""
@@ -24,11 +26,12 @@ class Personality:
 class AIInstance:
     """Represents a single AI instance created by the user - core domain object."""
     
-    def __init__(self, ai_name: str = "AI"):
+    def __init__(self, ai_name: str = "AI", memory_system: MemorySystem = None, model_interface: ModelInterface = None):
         self.ai_name = ai_name
         self.identity = Identity()
         self.personality = Personality()  
-        self.memory = {}  # Long-term memory system - to be implemented 
+        self.memory_system = memory_system  # Injected from outside
+        self.model_interface = model_interface  # Injected from outside
         self.creation_timestamp = datetime.now()
         
     def is_complete(self) -> bool:
