@@ -1,0 +1,8 @@
+{
+  "command": "git config --global user.name \"pur3lyra\"",
+  "cwd": "/workspace/project",
+  "timeout": 30,
+  "id": "66d686a2ff444b7293841c11617fc425",
+  "timestamp": "2026-07-21T01:26:01.711088Z",
+  "kind": "BashCommand"
+}
