@@ -1,8 +1,0 @@
-{
-  "command": "git config --global user.email \"pedroavancahue@gmail.com\"",
-  "cwd": "/workspace/project",
-  "timeout": 30,
-  "id": "99220452ed174a7e99aa08c3db76327e",
-  "timestamp": "2026-07-21T01:26:01.816223Z",
-  "kind": "BashCommand"
-}

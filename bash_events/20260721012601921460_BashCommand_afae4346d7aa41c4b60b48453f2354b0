@@ -1,8 +1,0 @@
-{
-  "command": "git init && git config --global --add safe.directory /workspace/project",
-  "cwd": "/workspace/project",
-  "timeout": 30,
-  "id": "afae4346d7aa41c4b60b48453f2354b0",
-  "timestamp": "2026-07-21T01:26:01.921460Z",
-  "kind": "BashCommand"
-}
