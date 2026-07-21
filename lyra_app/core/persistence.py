@@ -32,7 +32,11 @@ class PersistenceManager:
                 },
                 "model_configuration": getattr(ai_instance, 'model_configuration', None),
                 "memory": getattr(ai_instance, 'memory', {}),
-                "creation_timestamp": ai_instance.creation_timestamp.isoformat()
+                "creation_timestamp": ai_instance.creation_timestamp.isoformat(),
+                # Journal state - store only configuration, not the object itself
+                "journal": {
+                    "data_dir": str(ai_instance.journal.data_dir) if ai_instance.journal else None
+                } if hasattr(ai_instance, 'journal') and ai_instance.journal is not None else None
             }
             
             with open(file_path, 'w') as f:
@@ -76,6 +80,16 @@ class PersistenceManager:
                 ai_instance.creation_timestamp = datetime.fromisoformat(timestamp_str)
             else:
                 ai_instance.creation_timestamp = datetime.now()  # fallback
+            
+            # Handle journal state - compatible with old data (no journal field)
+            journal_config = data.get("journal")
+            if journal_config and journal_config.get("data_dir"):
+                # Initialize journal from saved configuration
+                try:
+                    # Initialize the journal without event logging for loading
+                    ai_instance.initialize_journal(journal_config["data_dir"])
+                except Exception:
+                    pass  # If initialization fails, keep journal as None
             
             return ai_instance
             

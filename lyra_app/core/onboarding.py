@@ -39,6 +39,19 @@ class OnboardingFlow:
         ai_instance.personality.selected_type = "friendly"
         print(f"Selected personality: {ai_instance.personality.selected_type}")
         
+        # Initialize journal during onboarding (this ensures it's available when needed)
+        ai_instance.initialize_journal()
+        
+        # Create initial event 
+        if ai_instance.journal:
+            try:
+                ai_instance.journal.add_important_event(
+                    "creation",
+                    "AI instance created"
+                )
+            except Exception:
+                pass  # If journal logging fails, continue
+        
         return ai_instance
     
     @staticmethod
@@ -51,9 +64,21 @@ class OnboardingFlow:
         Returns:
             True if successful, False otherwise
         """
-        # Save the completed onboarding state
+        # Save the completed onboarding state (this was already implemented)
         persistence_manager = PersistenceManager()
-        return persistence_manager.save_ai_instance(ai_instance)
+        success = persistence_manager.save_ai_instance(ai_instance)
+        
+        if success and ai_instance.journal:
+            # Register the completion event in the journal if available
+            try:
+                ai_instance.journal.add_important_event(
+                    "onboarding_completed",
+                    "Onboarding process completed"
+                )
+            except Exception:
+                pass  # If journal logging fails, continue
+        
+        return success
 
     @staticmethod
     def is_onboarding_complete(ai_instance: AIInstance) -> bool:
