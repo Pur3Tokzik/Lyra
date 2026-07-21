@@ -3,10 +3,10 @@ Lyra 0.0.1 - Lyra Factory
 Factory for creating complete Lyra instances with proper dependency injection.
 """
 
-from core.ai_instance import AIInstance
-from memory.file_memory_repository import FileMemoryRepository
-from memory.memory_system import MemorySystem
-from model.model_provider import ModelProvider
+from .ai_instance import AIInstance
+from ..memory.file_memory_repository import FileMemoryRepository
+from ..memory.memory_system import MemorySystem
+from ..model.model_provider import ModelProvider
 
 class LyraFactory:
     """Factory for creating complete Lyra AI instances with proper dependency injection."""

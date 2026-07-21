@@ -5,9 +5,9 @@ First point of entry for the Lyra application.
 
 import os
 from pathlib import Path
-from core.lyra_factory import LyraFactory
+from .core.lyra_factory import LyraFactory
 from core.persistence import PersistenceManager
-from core.onboarding import OnboardingFlow
+from .core.onboarding import OnboardingFlow
 
 def main():
     """Main entry point for Lyra application."""

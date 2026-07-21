@@ -3,9 +3,9 @@ Lyra 0.0.1 - Onboarding Flow
 Handles the user onboarding process for Lyra instances.
 """
 
-from core.persistence import PersistenceManager
-from core.lyra_factory import LyraFactory
-from core.ai_instance import AIInstance
+from .persistence import PersistenceManager
+from .lyra_factory import LyraFactory
+from .ai_instance import AIInstance
 
 class OnboardingFlow:
     """Manages the onboarding process for Lyra AI instances."""
