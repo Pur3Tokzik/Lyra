@@ -22,6 +22,22 @@ class Personality:
     def __init__(self):
         self.selected_type: Optional[str] = None  # One of predefined types  
         self.custom_description: Optional[str] = None
+    
+    def is_valid_personality_type(self, personality_type: str) -> bool:
+        """Check if the personality type is one of the supported types."""
+        valid_types = ["friendly", "chill", "playful", "direct", "custom"]
+        return personality_type.lower() in valid_types
+    
+    def get_personality_description(self) -> str:
+        """Get descriptive text for the current personality type."""
+        descriptions = {
+            "friendly": "Warm, friendly and easy to talk to",
+            "chill": "Calm, casual and relaxed",
+            "playful": "Playful, energetic and always ready for a joke",
+            "direct": "Honest, direct and straight to the point",
+            "custom": "Custom personality defined by user"
+        }
+        return descriptions.get(self.selected_type.lower(), "Default personality")
 
 class AIInstance:
     """Represents a single AI instance created by the user - core domain object."""
@@ -33,6 +49,8 @@ class AIInstance:
         self.memory_system = memory_system  # Injected from outside
         self.model_interface = model_interface  # Injected from outside
         self.creation_timestamp = datetime.now()
+        # Journal integration - will be initialized during onboarding
+        self.journal = None
         
     def is_complete(self) -> bool:
         """Check if AI has complete onboarding state."""

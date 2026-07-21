@@ -30,8 +30,8 @@ class PersistenceManager:
                     "selected_type": ai_instance.personality.selected_type,
                     "custom_description": ai_instance.personality.custom_description
                 },
-                "model_configuration": ai_instance.model_configuration,
-                "memory": ai_instance.memory,
+                "model_configuration": getattr(ai_instance, 'model_configuration', None),
+                "memory": getattr(ai_instance, 'memory', {}),
                 "creation_timestamp": ai_instance.creation_timestamp.isoformat()
             }
             
@@ -61,10 +61,21 @@ class PersistenceManager:
             ai_instance.personality.selected_type = data.get("personality", {}).get("selected_type")
             ai_instance.personality.custom_description = data.get("personality", {}).get("custom_description")
             
-            ai_instance.model_configuration = data.get("model_configuration")
-            ai_instance.memory = data.get("memory", {})
+            # Set model configuration and memory as attributes if they exist
+            model_config = data.get("model_configuration")
+            if model_config is not None:
+                ai_instance.model_configuration = model_config
+                
+            memory_data = data.get("memory", {})
+            if memory_data:
+                ai_instance.memory = memory_data
             
             # Note: creation_timestamp is loaded as string and would need parsing if needed
+            timestamp_str = data.get("creation_timestamp")
+            if timestamp_str:
+                ai_instance.creation_timestamp = datetime.fromisoformat(timestamp_str)
+            else:
+                ai_instance.creation_timestamp = datetime.now()  # fallback
             
             return ai_instance
             
