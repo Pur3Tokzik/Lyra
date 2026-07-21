@@ -1,3 +1,5 @@
 conversations/
 bash_events/
 config/
+__pycache__/
+*.pyc
