@@ -52,6 +52,20 @@ class AIInstance:
         # Journal integration - will be initialized during onboarding
         self.journal = None
         
+    def initialize_journal(self, data_dir: str = "./journal_data"):
+        """Initialize the journal system for this AI instance.
+        
+        Args:
+            data_dir: Directory where journal data should be stored
+        """
+        try:
+            # Lazy import to avoid circular dependencies
+            from journal.journal import Journal
+            self.journal = Journal(data_dir)
+        except ImportError as e:
+            print(f"Failed to initialize journal: {e}")
+            self.journal = None
+        
     def is_complete(self) -> bool:
         """Check if AI has complete onboarding state."""
         return (self.identity.created and 
