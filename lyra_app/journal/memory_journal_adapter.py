@@ -3,6 +3,7 @@ Lyra 0.0.1 - Journal-Memory Adapter
 Adapter for integrating journal system with memory management.
 """
 
+import json
 from typing import Optional, Dict, Any
 from lyra_app.memory.memory_system import MemorySystem
 from lyra_app.journal.entities import JournalData
@@ -20,8 +21,11 @@ class JournalMemoryAdapter:
         try:
             context = self.journal.get_session_context()
             if context:
-                # Store in memory with a specific key for session context
-                self.memory.save_memory("session_context", context)
+                # Store in memory with a specific category for session context
+                self.memory.add_memory(
+                    json.dumps(context, ensure_ascii=False),
+                    category="session_context"
+                )
             return True
         except Exception as e:
             print(f"Error saving session context to memory: {e}")
@@ -30,10 +34,15 @@ class JournalMemoryAdapter:
     def load_session_context_from_memory(self) -> Dict[str, Any]:
         """Load session context from memory system."""
         try:
-            context = self.memory.load_memory("session_context")
-            if context:
+            # Load session context memories
+            context_memories = self.memory.get_memories(category="session_context")
+            if context_memories:
+                # Get the most recent session context by timestamp
+                latest_context = max(context_memories, key=lambda x: x.timestamp)
+                context = json.loads(latest_context.content)
                 self.journal.update_session_context(context)
-            return context or {}
+                return context
+            return {}
         except Exception as e:
             print(f"Error loading session context from memory: {e}")
             return {}
@@ -43,7 +52,10 @@ class JournalMemoryAdapter:
         try:
             summary = self.journal.get_journal_summary()
             if summary:
-                self.memory.save_memory("journal_summary", summary)
+                self.memory.add_memory(
+                    json.dumps(summary, ensure_ascii=False, default=str),
+                    category="journal_summary"
+                )
             return True
         except Exception as e:
             print(f"Error saving journal summary to memory: {e}")

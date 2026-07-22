@@ -71,6 +71,39 @@ class Brain:
         
         return True
 
+    def get_journal_summary(self) -> dict:
+        """Get summary information about the journal state for this AI.
+        
+        Returns:
+            Dictionary containing basic journal metadata or empty dict if no journal
+        """
+        if not self.ai_instance or not hasattr(self.ai_instance, 'journal') or self.ai_instance.journal is None:
+            return {}
+            
+        try:
+            # Call the actual journal API to get summary data 
+            return self.ai_instance.journal.get_journal_summary()
+        except Exception:
+            return {}
+
+    def get_recent_journal_entries(self, limit: int = 10) -> list:
+        """Get recent journal entries for this AI.
+        
+        Args:
+            limit: Maximum number of entries to return (default 10)
+            
+        Returns:
+            List of recent journal entry dictionaries or empty list if no journal
+        """
+        if not self.ai_instance or not hasattr(self.ai_instance, 'journal') or self.ai_instance.journal is None:
+            return []
+        
+        try:
+            # Call the actual journal API to get recent entries
+            return self.ai_instance.journal.get_recent_entries(limit)
+        except Exception:
+            return []
+
     def get_personality_prompt(self) -> str:
         """Get the personality prompt that can be used when communicating with model.
         
