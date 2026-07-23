@@ -6,11 +6,13 @@ It calls the appropriate modules but never makes decisions or generates response
 """
 
 from typing import Optional, Dict, Any
+from collections.abc import Mapping
 from brain.decision import Decision
 from brain.execution_plan import ExecutionPlan, ExecutionStep
 from context.context_state import ContextState
 from memory.memory_system import MemorySystem
 from model.model_interface import ModelInterface
+from capabilities.base import BaseCapability
 
 class Executor:
     """
@@ -23,16 +25,19 @@ class Executor:
     
     def __init__(self, 
                  memory_system: MemorySystem = None,
-                 model_interface: ModelInterface = None):
+                 model_interface: ModelInterface = None,
+                 capabilities: Mapping[str, BaseCapability] | None = None):
         """
         Initialize the executor with system dependencies.
         
         Args:
             memory_system: Optional memory system to use for memory operations
             model_interface: Optional model interface for LLM calls
+            capabilities: Optional mapping of available capabilities
         """
         self.memory_system = memory_system 
         self.model_interface = model_interface
+        self.capabilities = capabilities or {}
         
     def execute_plan(self, 
                     execution_plan: ExecutionPlan,

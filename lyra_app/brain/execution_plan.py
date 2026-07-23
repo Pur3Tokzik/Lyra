@@ -90,6 +90,14 @@ class ExecutionPlan:
                 target_module="model"
             ))
             
+        # Handle capability execution if specified in metadata
+        if "capability" in decision.metadata:
+            capability_name = decision.metadata["capability"]
+            self.steps.append(ExecutionStep(
+                action=f"capability:{capability_name}",
+                target_module="capability"
+            ))
+            
         # Final response step (always added) - this is what determines final output
         self.steps.append(ExecutionStep(
             action="generate_response",

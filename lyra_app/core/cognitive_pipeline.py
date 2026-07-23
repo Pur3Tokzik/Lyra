@@ -36,16 +36,22 @@ class CognitivePipeline:
     
     def __init__(self, 
                  memory_system = None,
-                 model_interface = None):
+                 model_interface = None,
+                 capabilities = None):
         """
         Initialize cognitive pipeline with system dependencies.
         
         Args:
             memory_system: Optional memory system for memory operations  
             model_interface: Optional model interface for LLM access
+            capabilities: Optional mapping of available capabilities
         """
         self._decision_engine = DecisionEngine()
-        self._executor = Executor(memory_system=memory_system, model_interface=model_interface)
+        self._executor = Executor(
+            memory_system=memory_system, 
+            model_interface=model_interface,
+            capabilities=capabilities
+        )
         
     def process(self, 
                 context_state: ContextState,
