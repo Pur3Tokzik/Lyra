@@ -8,6 +8,8 @@ from datetime import datetime
 from typing import Optional
 from memory.memory_system import MemorySystem
 from model.model_interface import ModelInterface
+from context.context_manager import BasicContextManager
+from core.cognitive_pipeline import CognitivePipeline
 
 class Identity:
     """Represents the identity aspects of an AI."""
@@ -48,6 +50,11 @@ class AIInstance:
         self.personality = Personality()  
         self.memory_system = memory_system  # Injected from outside
         self.model_interface = model_interface  # Injected from outside
+        self.context_manager = BasicContextManager()  # Create context manager for interaction
+        self.cognitive_pipeline = CognitivePipeline(
+            memory_system=memory_system, 
+            model_interface=model_interface
+        )
         self.creation_timestamp = datetime.now()
         # Journal integration - will be initialized during onboarding
         self.journal = None
@@ -136,6 +143,69 @@ class AIInstance:
             
         except Exception as e:
             error_msg = f"Error processing message: {str(e)}"
+            print(error_msg)
+            return error_msg
+
+    def process_message(self, user_input: str) -> str:
+        """
+        Process a message from the user using cognitive pipeline.
+        
+        This method replaces the legacy processing flow with a cognitive decision framework,
+        where actions are determined by decisions made based on context and requirements.
+        
+        Args:
+            user_input (str): The user's input message
+            
+        Returns:
+            str: The AI's response to the user
+        """
+        # Create context from user input  
+        context_state = self.context_manager.create_context(
+            conversation_id="current_conv",
+            current_input=user_input,
+            memory_system=self.memory_system
+        )
+        
+        # Process through cognitive pipeline - this orchestrates brain components
+        try:
+            pipeline_results = self.cognitive_pipeline.process(
+                context_state=context_state,
+                input_text=user_input
+            )
+            
+            # Return the final result from execution
+            if pipeline_results.get('status') == 'error':
+                error_msg = f"Error in cognitive processing: {pipeline_results.get('error', 'Unknown error')}"
+                print(error_msg)
+                return error_msg
+                
+            # Extract the response from outputs, typically the final response
+            outputs = pipeline_results.get('outputs', [])
+            if outputs:
+                # Return last output which should contain the final response  
+                final_output = outputs[-1] if isinstance(outputs[-1], str) else str(outputs[-1])
+                
+                # Record AI's response in journal if available (preserving original behavior)
+                if self.journal and final_output:
+                    try:
+                        # Get conversation ID for logging - could be expanded from context state
+                        conv_id = f"conv_{len(self.journal.get_recent_entries(10))}"
+                        self.journal.add_conversation_entry(
+                            conversation_id=conv_id,
+                            speaker="ai", 
+                            content=final_output
+                        )
+                    except Exception as e:
+                        # If journal fails, continue without logging this response  
+                        print(f"Warning: Failed to log AI response to journal: {e}")
+                
+                return final_output
+            
+            # Fallback - if no outputs, return a generic message
+            return "Response generated successfully"
+            
+        except Exception as e:
+            error_msg = f"Error in cognitive processing: {str(e)}"
             print(error_msg)
             return error_msg
     
