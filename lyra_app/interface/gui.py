@@ -15,7 +15,9 @@ request data is sent anywhere except the configured local model.
 
 from __future__ import annotations
 
+import hmac
 import json
+import secrets
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -26,12 +28,17 @@ from lyra_app.core.ai_instance import AIInstance
 from lyra_app.core.instance import PERSONALITIES, personality_label
 from lyra_app.core.persistence import InstanceStore
 from lyra_app.interface import visual
-from lyra_app.interface.i18n import Translator, normalize_language
+from lyra_app.interface.i18n import (
+    Translator,
+    language_choices,
+    normalize_language,
+)
 
 _WEB = Path(__file__).with_name("web")
 _CHAT_TEMPLATE = _WEB / "index.html"
 _ONBOARD_TEMPLATE = _WEB / "onboard.html"
 _MAX_BODY = 64 * 1024
+_LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1", "[::1]"}
 
 
 def _fill(html: str, replacements: dict) -> str:
@@ -40,12 +47,13 @@ def _fill(html: str, replacements: dict) -> str:
     return html
 
 
-def _render_chat(instance: AIInstance) -> str:
+def _render_chat(instance: AIInstance, token: str = "") -> str:
     translator = instance.translator
     data = instance.data
     return _fill(
         _CHAT_TEMPLATE.read_text(encoding="utf-8"),
         {
+            "__TOKEN__": token,
             "__LANG__": data.identity.language,
             "__NAME__": data.identity.name,
             "__LANGUAGE__": data.identity.language,
@@ -56,11 +64,14 @@ def _render_chat(instance: AIInstance) -> str:
             "__ERROR__": translator.t("gui.error"),
             "__STATE_LABEL__": translator.t("gui.state_label"),
             "__GREETING__": translator.t("gui.greeting", name=data.identity.name),
+            "__COMPACT__": translator.t("gui.compact"),
+            "__EXPAND__": translator.t("gui.expand"),
+            "__COMPACT_HINT__": translator.t("gui.compact_hint"),
         },
     )
 
 
-def _render_onboarding(language: str) -> str:
+def _render_onboarding(language: str, token: str = "") -> str:
     """The visual onboarding page, in ``language`` (defaults to English)."""
     translator = Translator(language)
     options = [
@@ -92,6 +103,8 @@ def _render_onboarding(language: str) -> str:
             "__CREATING__": translator.t("gui.creating"),
             "__ONBOARD_ERROR__": translator.t("gui.onboard_error"),
             "__PERSONALITIES__": json.dumps(options, ensure_ascii=False),
+            "__LANGUAGES__": json.dumps(language_choices(), ensure_ascii=False),
+            "__TOKEN__": token,
         },
     )
 
@@ -113,18 +126,22 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
 
     assets_dir = target / "assets"
     lock = threading.Lock()
+    # A per-run token binds every state-changing request to this page. It stops
+    # another local program (or a random web page in another tab) from driving
+    # the companion through the loopback API. The token lives only in memory.
+    token = secrets.token_urlsafe(32)
     state: dict = {"instance": instance, "chat": None}
 
     def _chat_page() -> str:
         current = state["instance"]
         if current is None:
-            return _render_onboarding("en")
+            return _render_onboarding("en", token)
         if state["chat"] is None:
-            state["chat"] = _render_chat(current)
+            state["chat"] = _render_chat(current, token)
         return state["chat"]
 
     class Handler(BaseHTTPRequestHandler):
-        server_version = "LyraGUI/0.0.5"
+        server_version = "LyraGUI/0.0.6"
 
         def log_message(self, *args):  # keep the console quiet
             pass
@@ -133,8 +150,48 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
             self.send_response(status)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
+            # Local-first hardening: no framing, no MIME sniffing, no referrer
+            # leak, and nothing may be cached by shared caches.
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(body)
+
+        def _host_ok(self) -> bool:
+            """Reject requests whose Host is not loopback (DNS rebinding)."""
+            host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip()
+            return host in _LOCAL_HOSTS
+
+        def _origin_ok(self) -> bool:
+            """If a browser sends Origin, it must be a loopback origin."""
+            origin = self.headers.get("Origin")
+            if not origin:
+                return True
+            try:
+                from urllib.parse import urlparse as _urlparse
+                return _urlparse(origin).hostname in _LOCAL_HOSTS
+            except ValueError:
+                return False
+
+        def _token_ok(self) -> bool:
+            """Constant-time comparison of the header token against the run token."""
+            presented = self.headers.get("X-Lyra-Token") or ""
+            return hmac.compare_digest(presented, token)
+
+        def _guard(self) -> bool:
+            """Common gate for every state-changing POST. True means allowed."""
+            if not self._host_ok():
+                self._json({"error": "forbidden_host"}, status=403)
+                return False
+            if not self._origin_ok():
+                self._json({"error": "forbidden_origin"}, status=403)
+                return False
+            if not self._token_ok():
+                self._json({"error": "forbidden_token"}, status=403)
+                return False
+            return True
 
         def _json(self, payload: dict, status: int = 200) -> None:
             self._send(status, "application/json; charset=utf-8",
@@ -147,19 +204,22 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
             return parse_qs(urlparse(self.path).query)
 
         def do_GET(self) -> None:
+            if not self._host_ok():
+                self._json({"error": "forbidden_host"}, status=403)
+                return
             path = urlparse(self.path).path
             if path in ("/", "/index.html"):
                 if self._current() is None:
                     lang = (self._query().get("lang") or ["en"])[0]
                     self._send(200, "text/html; charset=utf-8",
-                               _render_onboarding(normalize_language(lang)).encode("utf-8"))
+                               _render_onboarding(normalize_language(lang), token).encode("utf-8"))
                 else:
                     self._send(200, "text/html; charset=utf-8",
                                _chat_page().encode("utf-8"))
             elif path in ("/onboarding", "/onboarding.html"):
                 lang = (self._query().get("lang") or ["en"])[0]
                 self._send(200, "text/html; charset=utf-8",
-                           _render_onboarding(normalize_language(lang)).encode("utf-8"))
+                           _render_onboarding(normalize_language(lang), token).encode("utf-8"))
             elif path == "/api/state":
                 current = self._current()
                 if current is None:
@@ -217,12 +277,19 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
 
         def do_POST(self) -> None:
             path = urlparse(self.path).path
+            if path not in ("/api/chat", "/api/onboard"):
+                self._send(404, "text/plain; charset=utf-8", b"not found")
+                return
+            if not self._guard():
+                return
+            content_type = (self.headers.get("Content-Type") or "").split(";")[0].strip()
+            if content_type != "application/json":
+                self._json({"error": "unsupported_media_type"}, status=415)
+                return
             if path == "/api/chat":
                 self._chat()
-            elif path == "/api/onboard":
-                self._onboard()
             else:
-                self._send(404, "text/plain; charset=utf-8", b"not found")
+                self._onboard()
 
         def _payload(self) -> dict | None:
             try:

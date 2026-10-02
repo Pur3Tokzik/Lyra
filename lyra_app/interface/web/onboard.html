@@ -83,11 +83,7 @@
 
   <div class="field">
     <label for="language">__LANGUAGE_LABEL__</label>
-    <select id="language">
-      <option value="en">English</option>
-      <option value="pt_PT">Português (Portugal)</option>
-      <option value="pt_BR">Português (Brasil)</option>
-    </select>
+    <select id="language"></select>
   </div>
 
   <div class="field">
@@ -126,8 +122,16 @@
 </main>
 <script>
   const PERSONALITIES = __PERSONALITIES__;
+  const LANGUAGES = __LANGUAGES__;
   const T = { creating: "__CREATING__", create: "__CREATE__", error: "__ONBOARD_ERROR__" };
+  const TOKEN = "__TOKEN__";
   const language = document.getElementById('language');
+  for (const item of LANGUAGES) {
+    const option = document.createElement('option');
+    option.value = item.value;
+    option.textContent = item.label;
+    language.appendChild(option);
+  }
   const cards = document.getElementById('cards');
   const customField = document.getElementById('custom-field');
   const errorBox = document.getElementById('error');
@@ -171,7 +175,7 @@
     try {
       const res = await fetch('/api/onboard', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'X-Lyra-Token': TOKEN},
         body: JSON.stringify({
           language: language.value,
           name: name,

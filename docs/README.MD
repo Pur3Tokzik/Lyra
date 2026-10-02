@@ -10,7 +10,11 @@ This directory contains the architectural documentation for Lyra.
 - `AUTONOMY.md` — how the companion keeps evolving on its own.
 - `CAPABILITIES.md` — write, install and share a capability.
 - `PREFERENCES.md` — how the companion learns how you want it to behave.
-- `PHASE_PLAN_0.0.5.md` — the current release, phase by phase (phases S–X).
+- `PHASE_PLAN_0.0.5.md` — what 0.0.5 added, phase by phase (phases S–X).
+- `AUDIT_0.0.6.md` — audit of 0.0.6 against the project philosophy, with a
+  readiness percentage and a testability estimate.
+- `MOBILE_AND_LINK.md` — plan for iOS/Android and for Lyra Link, the separate
+  program that connects computers.
 - `PHASE_PLAN_0.0.4.md` — what 0.0.4 added, phase by phase.
 - `RELEASE_NOTES_0.0.4.md` — the previous release notes.
 - `PHASE_PLAN_0.0.3.md` — the previous arc (phases G–N).

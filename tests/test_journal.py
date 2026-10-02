@@ -29,3 +29,30 @@ def test_adapter_round_trips_session_context(tmp_path):
     fresh_adapter = JournalMemoryAdapter(fresh_journal, memory)
     context = fresh_adapter.load_session_context_from_memory()
     assert context == {"topic": "astronomy"}
+
+
+def test_journal_edit_and_delete(tmp_path):
+    journal = Journal(data_dir=str(tmp_path))
+    journal.add_conversation_entry("c1", "user", "first")
+    journal.add_conversation_entry("c1", "ai", "second")
+
+    # Recent-first: position 1 is the newest entry.
+    assert journal.entry_at(1).content == "second"
+    assert journal.edit_entry(1, "corrected") is True
+    assert journal.entry_at(1).content == "corrected"
+
+    assert journal.delete_entry(1) is True
+    assert journal.entry_at(1).content == "first"
+    assert journal.delete_entry(99) is False
+    assert journal.edit_entry(0, "nope") is False
+
+
+def test_journal_edit_delete_persist(tmp_path):
+    journal = Journal(data_dir=str(tmp_path))
+    journal.add_conversation_entry("c1", "user", "hello")
+    journal.edit_entry(1, "hello there")
+
+    reloaded = Journal(data_dir=str(tmp_path))
+    assert reloaded.entry_at(1).content == "hello there"
+    reloaded.delete_entry(1)
+    assert Journal(data_dir=str(tmp_path)).get_entries() == []

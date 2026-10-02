@@ -20,7 +20,12 @@ from lyra_app.core.instance import (
     Settings,
 )
 from lyra_app.core.persistence import InstanceStore
-from lyra_app.interface.i18n import Translator, language_display_name, normalize_language
+from lyra_app.interface.i18n import (
+    Translator,
+    available_languages,
+    language_display_name,
+    normalize_language,
+)
 
 
 @dataclass
@@ -110,7 +115,10 @@ def run_interactive(
     model_interface=None,
 ) -> AIInstance:
     """Ask the onboarding questions on the terminal, then create the companion."""
-    language = normalize_language(input_fn(Translator("en").t("onboarding.language_prompt")))
+    languages = ", ".join(available_languages())
+    language = normalize_language(
+        input_fn(Translator("en").t("onboarding.language_prompt", languages=languages))
+    )
     translator = Translator(language)
 
     output_fn(translator.t("onboarding.welcome"))

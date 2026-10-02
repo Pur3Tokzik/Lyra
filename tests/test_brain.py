@@ -77,3 +77,19 @@ def test_model_broken_output_falls_back(instance):
     instance.brain.executor.model_interface = _Broken()
     text = instance.process("explica-me algo")["text"]
     assert "AI language model" not in text
+
+
+def test_journal_view_edit_delete_commands(instance):
+    # Viewing returns the recent-first list with 1-based positions.
+    listing = instance.process("/journal")["text"]
+    assert listing
+    instance.process("/journal edit 1 corrected entry")
+    assert "corrected entry" in instance.process("/journal")["text"]
+    instance.process("/journal delete 1")
+    assert "corrected entry" not in instance.process("/journal")["text"]
+
+
+def test_journal_command_usage_errors(instance):
+    assert instance.process("/journal delete")["text"]
+    assert instance.process("/journal edit 1")["text"]
+    assert instance.process("/journal bogus")["text"]

@@ -26,7 +26,7 @@ python -m lyra_app --home ./me --model llama3
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud (needs LYRA_CLOUD_API_KEY)
 python -m lyra_app --doctor        # environment check, no instance needed
 python -m lyra_app --gui           # local web GUI on :8000 (visual onboarding if new)
-python -m pytest -q                # tests live in tests/; 149 expected
+python -m pytest -q                # tests live in tests/; 175 collected (174 pass, 1 skip)
 ./install.sh --help                # installer is syntax-checked in CI
 ```
 
@@ -78,13 +78,17 @@ memory.
   `reminder`, `weather`, `voice`).
 - `interface/` — i18n, CLI, visual identity (`visual.py`) and local web GUI
   (`gui.py` + `web/index.html` chat and `web/onboard.html` visual onboarding).
-- `locales/` — `en`, `pt_PT`, `pt_BR`.
+  The GUI is hardened: a per-run token, loopback `Host` check, `Origin` check,
+  strict `Content-Type` and security headers gate every state-changing POST.
+- `locales/` — `en`, `pt_PT`, `pt_BR`. Add a language by dropping `xx.json`
+  here; `i18n` discovers it and the menus grow automatically.
 
 ## Documentation map
 
 - Current release docs: `README.md`, `docs/INSTALL.md`, `docs/CLOUD_MODELS.md`,
   `docs/AUTONOMY.md`, `docs/CAPABILITIES.md`, `docs/PREFERENCES.md`,
-  `docs/PHASE_PLAN_0.0.5.md`, `CHANGELOG.md`.
+  `docs/PHASE_PLAN_0.0.5.md`, `docs/AUDIT_0.0.6.md`,
+  `docs/MOBILE_AND_LINK.md`, `CHANGELOG.md`.
 - Previous release docs: `docs/PHASE_PLAN_0.0.4.md`,
   `docs/RELEASE_NOTES_0.0.4.md`.
 - Design baseline (written at 0.0.1, describes intent, not current state):
@@ -97,6 +101,15 @@ memory.
 ## Gotchas
 
 - Language is stored in `identity`, not in settings.
+- The locale layer discovers files dynamically and falls back `xx_YY -> xx ->
+  en`. Never hard-code the language list; use `available_languages()` /
+  `language_choices()`.
+- `/journal edit <n>` and `/journal delete <n>` use 1-based positions in the
+  recent-first listing. Journal commands are deliberately not journaled, or each
+  view would shift the positions.
+- `read_json_migrated` migrates data on load and reads newer `format_version`
+  files forward-compatibly; never refuse a file just because its version is
+  newer.
 - The GUI can start before the companion exists: `serve(None, home=...)` renders
   the visual onboarding, and `/api/onboard` creates the instance and swaps the
   handler to the chat page. The first creation is guarded so a second request

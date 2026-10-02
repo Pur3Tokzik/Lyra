@@ -3,7 +3,7 @@
   "language_name": "English",
   "onboarding": {
     "welcome": "Let's create your companion. It will live on this computer and belong to you.",
-    "language_prompt": "Language (en, pt_PT, pt_BR) [en]: ",
+    "language_prompt": "Language ({languages}) [en]: ",
     "name_prompt": "Give your companion a name: ",
     "address_prompt": "What should it call you? ",
     "personality_prompt": "Personality (friendly, chill, playful, direct, custom) [friendly]: ",
@@ -67,7 +67,7 @@
   "identity_human": "No, I'm not human. I'm an AI companion that runs on your computer. I won't pretend otherwise.",
   "reduced_mode": "There's no language model connected right now, so I can't answer that freely. I still handle commands, memory and simple things. Want to see what I can do?",
   "commands": {
-    "help": "Commands: /help, /memories, /remember <key> <value>, /forget <key>, /journal, /model <name> (or /model pull), /identity, /goals, /goal <text>, /capability enable|install|export, /preferences, /name <new name>, /voice, /doctor, /models, /autonomy, /quit.",
+    "help": "Commands: /help, /memories, /remember <key> <value>, /forget <key>, /journal (view|edit <n> <text>|delete <n>), /model <name> (or /model pull), /identity, /goals, /goal <text>, /capability enable|install|export, /preferences, /name <new name>, /voice, /doctor, /models, /autonomy, /quit.",
     "memory_header": "Saved memories:",
     "memory_empty": "No memories saved yet.",
     "memory_forgot": "Forgot '{key}'.",
@@ -80,7 +80,13 @@
     "memory_set": "Saved '{key}'.",
     "memory_set_usage": "Use /remember <key> <value>, for example /remember city Lisbon.",
     "model_ready": "ready",
-    "model_offline": "not reachable right now"
+    "model_offline": "not reachable right now",
+    "journal_usage": "Use /journal to read it, /journal edit <n> <text> to correct an entry, or /journal delete <n> to erase one.",
+    "journal_edit_usage": "Use /journal edit <n> <text>, for example /journal edit 1 I met Ana today.",
+    "journal_delete_usage": "Use /journal delete <n>, for example /journal delete 2.",
+    "journal_edited": "Updated journal entry {position}.",
+    "journal_deleted": "Deleted journal entry {position}.",
+    "journal_not_found": "I didn't find journal entry {position}."
   },
   "errors": {
     "model_error": "Something went wrong talking to the model, so I answered as best I could without it."
@@ -162,7 +168,10 @@
     "creating": "Creating…",
     "first_memory": "Hi {user}. I'm {name}. I'm here now, and this is my first memory of you.",
     "welcome_back": "This folder already holds {name}.",
-    "onboard_error": "Please give your companion a name."
+    "onboard_error": "Please give your companion a name.",
+    "compact": "Compact",
+    "expand": "Expand",
+    "compact_hint": "Compact mode"
   },
   "models": {
     "header": "Machine profile: {profile}",

@@ -3,7 +3,7 @@
   "language_name": "Português (Portugal)",
   "onboarding": {
     "welcome": "Vamos criar a tua companhia. Ela vai viver neste computador e pertencer-te.",
-    "language_prompt": "Idioma (en, pt_PT, pt_BR) [pt_PT]: ",
+    "language_prompt": "Idioma ({languages}) [pt_PT]: ",
     "name_prompt": "Dá um nome à tua companhia: ",
     "address_prompt": "Como queres que ela te trate? ",
     "personality_prompt": "Personalidade (friendly, chill, playful, direct, custom) [friendly]: ",
@@ -80,7 +80,13 @@
     "memory_set": "Guardei '{key}'.",
     "memory_set_usage": "Usa /lembrar <chave> <valor>, por exemplo /lembrar cidade Lisboa.",
     "model_ready": "pronto",
-    "model_offline": "inacessível neste momento"
+    "model_offline": "inacessível neste momento",
+    "journal_usage": "Usa /journal para ler, /journal editar <n> <texto> para corrigir uma entrada, ou /journal apagar <n> para eliminar uma.",
+    "journal_edit_usage": "Usa /journal editar <n> <texto>, por exemplo /journal editar 1 Conheci a Ana hoje.",
+    "journal_delete_usage": "Usa /journal apagar <n>, por exemplo /journal apagar 2.",
+    "journal_edited": "Entrada {position} do diário atualizada.",
+    "journal_deleted": "Entrada {position} do diário apagada.",
+    "journal_not_found": "Não encontrei a entrada {position} do diário."
   },
   "errors": {
     "model_error": "Algo correu mal a falar com o modelo, por isso respondi o melhor que consegui sem ele."
@@ -162,7 +168,10 @@
     "creating": "A criar…",
     "first_memory": "Olá {user}. Sou a {name}. Estou aqui agora, e esta é a minha primeira memória de ti.",
     "welcome_back": "Esta pasta já contém {name}.",
-    "onboard_error": "Dá um nome à tua companheira."
+    "onboard_error": "Dá um nome à tua companheira.",
+    "compact": "Compacto",
+    "expand": "Expandir",
+    "compact_hint": "Modo compacto"
   },
   "models": {
     "header": "Perfil da máquina: {profile}",

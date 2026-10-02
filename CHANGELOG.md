@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.0.6 — languages that scale, a journal you own, a harder GUI
+
+### Added
+
+- **Languages that open up without breaking** (REQ-059): the interface now
+  discovers every locale file in `locales/` instead of hard-coding three. Adding
+  a language is dropping a `xx.json` next to `en.json`; lookups fall back
+  `pt_BR` -> `pt` -> `en`, and a partial or corrupt file degrades to English
+  instead of crashing. `language_choices()` feeds the GUI and CLI onboarding, so
+  the menu grows with the files. The default trio stays en, pt_PT and pt_BR.
+- **Brazilian Portuguese in the brain** (REQ-012): intent rules now recognise
+  `você`, `celular`, `me chamo`, `curto`, `moro no`, `como está o tempo?`,
+  `que horas são agora?`, `me lembra de` and more, so a pt_BR user reaches the
+  local brain instead of falling through to the model.
+- **A journal you own** (fase E): `/journal edit <n> <text>` and
+  `/journal delete <n>` read, correct and erase entries. Reading or editing the
+  journal no longer records itself, so positions stay stable. New
+  `Journal.get_entries`, `entry_at`, `edit_entry`, `delete_entry`.
+- **Format migration on load**: `read_json_migrated` / `migrate_payload` stamp
+  the current `format_version`, run per-version migration steps, and read a
+  newer file forward-compatibly instead of refusing it (REQ-004, REQ-032).
+
+### Security
+
+- **Loopback GUI hardening** (REQ-001, REQ-002): a per-run session token gates
+  every state-changing request, `Host` is validated against loopback (DNS
+  rebinding), a foreign `Origin` is rejected, `Content-Type` must be
+  `application/json`, and responses carry `X-Frame-Options: DENY`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` and
+  `Cache-Control: no-store`. Nothing leaves the machine.
+
+### Changed
+
+- **Chat interface redesign**: simpler and more futuristic, built for a large
+  screen, a normal window, or a small always-around panel. A compact mode
+  shrinks the layout and remembers the choice in `localStorage`. Still no
+  framework and no build step.
+
 ## 0.0.5 — objectives, capabilities, voice and learned behaviour
 
 ### Added

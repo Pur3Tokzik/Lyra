@@ -278,13 +278,7 @@ class Brain:
             else:
                 result["text"] = t.t("commands.memory_not_found", key=intent.argument)
         elif command == "journal":
-            entries = self.journal.get_recent_entries(10) if self.journal else []
-            if not entries:
-                result["text"] = t.t("commands.journal_empty")
-            else:
-                lines = [t.t("commands.journal_header")]
-                lines += [f"- [{e.timestamp:%Y-%m-%d %H:%M}] {e.content}" for e in entries]
-                result["text"] = "\n".join(lines)
+            result["text"] = self._handle_journal_command(intent.argument)
         elif command == "model_set":
             if not intent.argument:
                 result["text"] = t.t("commands.model_missing")
@@ -375,8 +369,52 @@ class Brain:
         else:
             result["text"] = t.t("commands.unknown")
 
-        self._record(intent.raw, result["text"], "default")
+        # Reading or editing the journal must not itself become a journal entry,
+        # or every view would shift the positions the person is editing.
+        if command != "journal":
+            self._record(intent.raw, result["text"], "default")
         return result
+
+    def _handle_journal_command(self, argument: str) -> str:
+        """Handle ``/journal`` (view), ``/journal edit <n> <text>`` and ``delete <n>``.
+
+        The journal belongs to the person: it can be read, corrected and erased
+        (fase E of the alignment plan). Editing is explicit, never automatic.
+        """
+        t = self.translator
+        if self.journal is None:
+            return t.t("commands.journal_empty")
+
+        argument = (argument or "").strip()
+        if not argument:
+            entries = self.journal.get_entries(10)
+            if not entries:
+                return t.t("commands.journal_empty")
+            lines = [t.t("commands.journal_header")]
+            lines += [
+                f"- [{e.timestamp:%Y-%m-%d %H:%M}] {e.content}"
+                for e in entries
+            ]
+            return "\n".join(lines)
+
+        parts = argument.split(" ", 2)
+        verb = parts[0].lower()
+
+        if verb in ("delete", "apagar", "eliminar", "remover"):
+            if len(parts) < 2 or not parts[1].isdigit():
+                return t.t("commands.journal_delete_usage")
+            if self.journal.delete_entry(int(parts[1])):
+                return t.t("commands.journal_deleted", position=parts[1])
+            return t.t("commands.journal_not_found", position=parts[1])
+
+        if verb in ("edit", "editar", "alterar", "corrigir"):
+            if len(parts) < 3 or not parts[1].isdigit() or not parts[2].strip():
+                return t.t("commands.journal_edit_usage")
+            if self.journal.edit_entry(int(parts[1]), parts[2]):
+                return t.t("commands.journal_edited", position=parts[1])
+            return t.t("commands.journal_not_found", position=parts[1])
+
+        return t.t("commands.journal_usage")
 
     def _handle_capability_command(self, argument: str) -> str:
         """Handle ``/capability enable|disable|remove <name>`` and packages.

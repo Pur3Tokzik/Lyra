@@ -9,7 +9,7 @@ save game.
 
 ## Status: 0.0.5
 
-0.0.5 closes the gaps the 0.0.4 README listed under "Still ahead" (phases S–W),
+0.0.6 makes the language layer scale to any locale, gives the person full control of the journal, hardens the local GUI and redesigns the chat. 0.0.5 closed the gaps the 0.0.4 README listed under "Still ahead" (phases S–W),
 and adds the two things you asked for: behaviour that adapts to the person, and a
 name that is only a default.
 
@@ -72,7 +72,7 @@ And everything from 0.0.2 still holds:
 
 ## Still ahead
 
-Honest list of what 0.0.5 does not do yet:
+Honest list of what 0.0.6 does not do yet:
 
 - No remote capability registry. Sharing is by file: `/capability export` then
   `/capability install <file>`. A hosted registry needs trust infrastructure and
@@ -80,6 +80,10 @@ Honest list of what 0.0.5 does not do yet:
 - The camera stays out of scope on purpose (`docs/REQUIREMENTS.md`).
 - No embeddings or vector store: relevance stays deterministic and offline.
 - No streaming model output.
+- No mobile app yet. On a phone the companion would use a cloud model, because
+  the brain and the model are already separate; see `docs/MOBILE_AND_LINK.md`.
+- No Lyra Link yet. Connecting two computers is planned as a separate program,
+  not part of the core; see `docs/MOBILE_AND_LINK.md`.
 
 ## Requirements
 
@@ -116,7 +120,8 @@ the `LYRA_HOME` environment variable.
 
 ```
 /help, /memories, /remember <key> <value>, /forget <key>,
-/journal, /model <name>, /model pull [name], /identity, /name <new name>,
+/journal [edit <n> <text> | delete <n>], /model <name>, /model pull [name],
+/identity, /name <new name>,
 /capabilities, /capability enable|disable|install|remove|export <name>,
 /state, /dreams, /goals, /goal <text>, /goal done|pause|resume <id>,
 /voice on|off|say <text>, /preferences [set|forget],
