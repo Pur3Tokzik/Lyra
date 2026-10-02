@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lyra"
-version = "0.0.2"
+version = "0.0.3"
 description = "Local-first AI companion system: the brain decides, the model is a function."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,10 +27,11 @@ packages = [
     "lyra_app.journal",
     "lyra_app.memory",
     "lyra_app.model",
+    "lyra_app.capabilities.builtin",
 ]
 
 [tool.setuptools.package-data]
-lyra_app = ["locales/*.json"]
+lyra_app = ["locales/*.json", "interface/web/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

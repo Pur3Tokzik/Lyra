@@ -1,5 +1,47 @@
 # Changelog
 
+## 0.0.3 — capabilities, states, dreams and a face
+
+Follows phases G to N of the alignment document (02/10/2026).
+
+### Added
+
+- **Capability runtime** (FASE G): discover, enable, execute and disable
+  capabilities, with state and permissions; enabled state persists in
+  `capabilities.json` inside the instance folder.
+- **Built-in capabilities** (FASE H): `clock`, `calculator` (safe `ast`, never
+  `eval`), `reminder`, and `weather` (network, disabled by default).
+- **Internal states** (FASE I): curiosity, focus, interest, operational
+  frustration and priority, persisted in `state/state.json`. Simulated only;
+  never claim human feelings, never manipulate (VISION 17, REQ-043/044).
+- **Dreams** (FASE J): offline reflection over memory and journal, journaled as
+  `dream` events; never invent events presented as real (VISION 18, REQ-065).
+- **Objectives** (FASE K): internal goals with priority and status, stored in
+  `goals/goals.json`; never override the user or the guideline (VISION 19,
+  REQ-066).
+- **Hardware profile** (FASE L): CPU/RAM/GPU detection, basic/standard/advanced
+  profiles and a local model catalogue; advisory only (REQ-009).
+- **Visual presence and GUI** (FASE M): state-to-asset mapping and a local web
+  GUI using only the standard library (`--gui`, `--port`).
+- New commands: `/capabilities`, `/capability`, `/state`, `/dreams`, `/goals`,
+  `/goal`, `/hardware`, in en, pt_PT and pt_BR.
+- Release notes in `docs/RELEASE_NOTES_0.0.3.md`.
+
+### Fixed
+
+- `capabilities/request.py` was missing the `Any` import.
+- `capabilities/result.py` had a dataclass field-ordering error.
+
+### Numbers
+
+- 86 tests passing (up from 46 in 0.0.2).
+- Still 0 third-party dependencies in the core.
+
+### Still ahead
+
+Voice and camera capabilities, the capability marketplace, and objectives the
+instance can propose on its own.
+
 ## 0.0.2 — the brain starts to run, decide and speak
 
 First version where Lyra actually starts, converses and keeps a companion.

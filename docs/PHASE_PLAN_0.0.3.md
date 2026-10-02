@@ -56,6 +56,8 @@ Deliverables:
 
 ## FASE I — Internal States
 
+Status: Completed
+
 Purpose:
 Simulated internal states that influence how the system organises itself.
 
@@ -70,6 +72,8 @@ Deliverables:
 
 ## FASE J — Dreams (offline reflection)
 
+Status: Completed
+
 Purpose:
 During inactivity, reflect on memory and journal to form associations.
 
@@ -83,6 +87,8 @@ Deliverables:
 
 ## FASE K — Objectives
 
+Status: Completed
+
 Purpose:
 Internal goals that shape priorities without replacing user control.
 
@@ -95,6 +101,8 @@ Deliverables:
 ---
 
 ## FASE L — Hardware Profile & Model Recommendation
+
+Status: Completed
 
 Purpose:
 Adapt to the machine without asking the user to understand hardware.
@@ -111,6 +119,8 @@ Deliverables:
 
 ## FASE M — Visual Presence & GUI
 
+Status: Completed
+
 Purpose:
 A clear, modern, lightly transparent interface with a visual identity, built
 Linux-first (Arch / CachyOS) and portable elsewhere.
@@ -125,6 +135,8 @@ Deliverables:
 ---
 
 ## FASE N — Packaging, Docs & Distribution
+
+Status: Completed
 
 Purpose:
 Make Lyra easy to install, study, fork and redistribute.

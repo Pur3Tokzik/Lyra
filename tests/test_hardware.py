@@ -1,4 +1,4 @@
-from lyra_app.core import hardware
+from lyra_app.core import hardware, model_catalog
 
 
 def test_detect_returns_profile():
@@ -25,3 +25,11 @@ def test_report_shape():
 def test_hardware_command(instance):
     reply = instance.process("/hardware")["text"]
     assert "profile" in reply.lower()
+
+
+def test_catalog_matches_profile():
+    basic = model_catalog.for_profile(hardware.BASIC)
+    advanced = model_catalog.for_profile(hardware.ADVANCED)
+    assert basic and advanced
+    assert all(model.profile == hardware.BASIC for model in basic)
+    assert model_catalog.recommend_for(hardware.BASIC).name == basic[0].name
