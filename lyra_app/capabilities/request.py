@@ -4,7 +4,7 @@ Represents requests sent by the Brain to capabilities
 """
 
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Any, Mapping
 from types import MappingProxyType
 
 

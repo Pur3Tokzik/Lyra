@@ -88,5 +88,21 @@
     "playful": "Brincalhona, energética e sempre pronta para uma piada",
     "direct": "Honesta, direta e sem rodeios",
     "custom": "Personalidade personalizada definida pelo utilizador"
+  },
+  "capabilities": {
+    "none": "Neste momento não tenho um sistema de capacidades disponível.",
+    "empty": "Ainda não há capacidades instaladas.",
+    "header": "Capacidades disponíveis:",
+    "line": "- {name} ({state}): {description}",
+    "usage": "Uso: /capacidade ativar|desativar|instalar|remover <nome>",
+    "unknown": "Não conheço nenhuma capacidade chamada '{name}'.",
+    "unavailable": "A capacidade '{name}' não está ativa. Podes ligá-la com /capacidade ativar {name}.",
+    "failed": "A capacidade '{name}' não conseguiu completar isso.",
+    "enabled": "A capacidade '{name}' está agora ativa.",
+    "enable_failed": "Não consegui ativar '{name}'. Pode precisar de uma permissão que ainda não concedeste.",
+    "disabled": "A capacidade '{name}' está agora desativada.",
+    "installed": "A capacidade '{name}' está instalada.",
+    "removed": "A capacidade '{name}' foi removida.",
+    "reminder_set": "Vou lembrar-te: {text}"
   }
 }

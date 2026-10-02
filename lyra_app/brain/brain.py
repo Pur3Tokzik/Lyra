@@ -21,6 +21,8 @@ from lyra_app.brain.decision_engine import DecisionEngine
 from lyra_app.brain.decision_types import DecisionType
 from lyra_app.brain.executor import Executor
 from lyra_app.brain.intent import Intent, detect, stable_key
+from lyra_app.capabilities.request import CapabilityRequest
+from lyra_app.capabilities.result import CapabilityStatus
 from lyra_app.context.context_manager import BasicContextManager
 from lyra_app.guideline.guideline import Guideline
 from lyra_app.interface.i18n import Translator, fold_accents
@@ -40,6 +42,7 @@ class Brain:
         journal=None,
         guideline: Optional[Guideline] = None,
         store=None,
+        capability_manager=None,
     ):
         self.memory_system = memory_system
         self.model_interface = model_interface
@@ -47,6 +50,7 @@ class Brain:
         self.instance = instance
         self.journal = journal
         self.store = store
+        self.capability_manager = capability_manager
         self.guideline = guideline or Guideline()
         self.decision_engine = DecisionEngine()
         self.context_manager = BasicContextManager(memory_system=memory_system)
@@ -98,17 +102,20 @@ class Brain:
 
         decision = self.decision_engine.make_decision(context)
         result["decision"] = str(decision.decision_type)
-        result["text"] = self._execute(decision, context, intent)
+        result["text"] = self._execute(decision, context, intent, decision)
 
         self._record(text, result["text"], conversation_id)
         return result
 
     # -- execution ------------------------------------------------------
 
-    def _execute(self, decision, context, intent) -> str:
+    def _execute(self, decision, context, intent, decision_obj=None) -> str:
         if decision.decision_type == DecisionType.STORE_MEMORY:
             key = intent.metadata.get("key") or stable_key(intent.raw) or "user.note"
             return self.executor.store_fact(key, intent.argument)
+
+        if decision.decision_type == DecisionType.EXECUTE_ACTION:
+            return self._execute_capability(intent, decision_obj)
 
         if decision.decision_type == DecisionType.LOOKUP_MEMORY:
             return self.executor.recall_facts(context.current_input)
@@ -130,6 +137,53 @@ class Brain:
             human_question = any(m in fold_accents(intent.raw) for m in _HUMAN_MARKERS)
             return self.executor.respond_identity(human_question)
         return self.executor.respond_empty()
+
+    def _execute_capability(self, intent, decision) -> str:
+        """Ask the capability manager to run a capability the brain selected."""
+        t = self.translator
+        if self.capability_manager is None:
+            return t.t("capabilities.none")
+
+        name = (decision.metadata.get("capability") if decision else None) or intent.metadata.get("capability")
+        if not name:
+            return t.t("capabilities.unknown", name="")
+
+        if not self.capability_manager.is_available(name):
+            return t.t("capabilities.unavailable", name=name)
+
+        action = self._capability_action(name, intent.raw)
+        request = CapabilityRequest(
+            request_id=f"{name}:{intent.raw[:40]}",
+            capability_name=name,
+            action=action,
+            parameters={"query": intent.raw, "argument": intent.argument},
+        )
+        result = self.capability_manager.execute(request)
+        if result.status != CapabilityStatus.SUCCESS:
+            if self.journal:
+                self.journal.add_important_event(
+                    "capability", f"{name} failed: {result.error_code}"
+                )
+            return t.t("capabilities.failed", name=name)
+        return self._format_capability(name, action, result)
+
+    def _format_capability(self, name: str, action: str, result) -> str:
+        """Turn a capability result into a natural, localized reply."""
+        t = self.translator
+        if name == "reminder" and action == "set":
+            return t.t("capabilities.reminder_set", text=result.data.get("text", ""))
+        return str(result.data.get("text", "")) or t.t("capabilities.failed", name=name)
+
+    @staticmethod
+    def _capability_action(name: str, raw: str) -> str:
+        folded = fold_accents(raw)
+        if name == "clock":
+            return "date" if ("dia" in folded or "date" in folded) else "time"
+        if name == "reminder":
+            return "set"
+        if name == "weather":
+            return "current"
+        return "calculate"
 
     # -- commands -------------------------------------------------------
 
@@ -181,6 +235,27 @@ class Brain:
                 if self.store:
                     self.store.save_settings(self.instance.settings)
                 result["text"] = t.t("commands.model_set", model=intent.argument)
+        elif command == "capabilities":
+            if self.capability_manager is None:
+                result["text"] = t.t("capabilities.none")
+            else:
+                items = self.capability_manager.list_capabilities()
+                if not items:
+                    result["text"] = t.t("capabilities.empty")
+                else:
+                    lines = [t.t("capabilities.header")]
+                    for item in items:
+                        lines.append(
+                            t.t(
+                                "capabilities.line",
+                                name=item["name"],
+                                state=item["state"],
+                                description=item["description"],
+                            )
+                        )
+                    result["text"] = "\n".join(lines)
+        elif command == "capability":
+            result["text"] = self._handle_capability_command(intent.argument)
         elif command == "quit":
             result["quit"] = True
             result["text"] = self.executor.respond_farewell()
@@ -189,6 +264,29 @@ class Brain:
 
         self._record(intent.raw, result["text"], "default")
         return result
+
+    def _handle_capability_command(self, argument: str) -> str:
+        """Handle ``/capability enable|disable|install|remove <name>``."""
+        t = self.translator
+        if self.capability_manager is None:
+            return t.t("capabilities.none")
+        parts = (argument or "").split()
+        if len(parts) < 2:
+            return t.t("capabilities.usage")
+        verb, name = parts[0].lower(), parts[1]
+        if verb in ("enable", "ativar", "ligar"):
+            ok = self.capability_manager.enable(name)
+            return t.t("capabilities.enabled", name=name) if ok else t.t("capabilities.enable_failed", name=name)
+        if verb in ("disable", "desativar", "desligar"):
+            ok = self.capability_manager.disable(name)
+            return t.t("capabilities.disabled", name=name) if ok else t.t("capabilities.unknown", name=name)
+        if verb in ("install", "instalar"):
+            ok = self.capability_manager.install(name)
+            return t.t("capabilities.installed", name=name) if ok else t.t("capabilities.unknown", name=name)
+        if verb in ("remove", "remover", "uninstall"):
+            ok = self.capability_manager.remove(name)
+            return t.t("capabilities.removed", name=name) if ok else t.t("capabilities.unknown", name=name)
+        return t.t("capabilities.usage")
 
     # -- journaling -----------------------------------------------------
 

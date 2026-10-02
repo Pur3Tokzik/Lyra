@@ -20,6 +20,7 @@ class Intent(Enum):
     REMEMBER = "remember"
     RECALL = "recall"
     IDENTITY_QUERY = "identity_query"
+    CAPABILITY = "capability"
     COMMAND = "command"
     FREE_CHAT = "free_chat"
 
@@ -52,11 +53,13 @@ _COMMANDS = {
     "memory_list": ("/memories", "/memorias", "ver memorias", "ver memórias", "memories"),
     "journal": ("/journal", "/diario", "/diário", "diario", "diário", "journal"),
     "identity": ("/identity", "/identidade", "identidade", "identity"),
+    "capabilities": ("/capabilities", "/capacidades", "capabilities", "capacidades"),
     "quit": ("/quit", "/sair", "/exit", "quit", "exit", "sair"),
 }
 _FORGET_PREFIXES = ("/forget ", "/esquecer ", "esquecer ", "forget ")
 _REMEMBER_PREFIXES = ("/remember ", "/lembrar ", "lembrar ")
 _MODEL_PREFIXES = ("/model ", "model ")
+_CAPABILITY_PREFIXES = ("/capability ", "/capacidade ", "capability ", "capacidade ")
 
 _EXIT = {"quit", "exit", "sair", "adeus", "tchau", "xau", "bye", "goodbye"}
 
@@ -91,6 +94,19 @@ _IDENTITY = re.compile(
     r"are you human|are you a robot|your personality)\b"
 )
 
+# Capability requests: mapped to a capability name plus the raw argument.
+_CAPABILITY_PATTERNS = (
+    (re.compile(r"\b(?:que horas sao|que horas e|diz-me as horas|"
+                r"what time is it|what is the time)\b"), "clock"),
+    (re.compile(r"\b(?:que dia e hoje|data de hoje|what day is it|today's date|"
+                r"what is the date)\b"), "clock"),
+    (re.compile(r"\b(?:que tempo faz|tempo em|previsao do tempo|"
+                r"weather in|what's the weather|what is the weather)\b"), "weather"),
+    (re.compile(r"\b(?:calcula|quanto e|quanto da|calc|calculate)\s+(.+)"), "calculator"),
+    (re.compile(r"\b(?:lembra-me de|avisa-me de|set a reminder|"
+                r"remind me to|remind me)\s+(.+)"), "reminder"),
+)
+
 
 def detect(text: str) -> IntentResult:
     raw = text
@@ -118,6 +134,12 @@ def detect(text: str) -> IntentResult:
             if lowered.startswith(prefix):
                 return IntentResult(
                     Intent.COMMAND, command="model_set",
+                    argument=stripped[len(prefix):].strip(), raw=raw,
+                )
+        for prefix in _CAPABILITY_PREFIXES:
+            if lowered.startswith(prefix):
+                return IntentResult(
+                    Intent.COMMAND, command="capability",
                     argument=stripped[len(prefix):].strip(), raw=raw,
                 )
         first = lowered.split()[0]
@@ -153,6 +175,17 @@ def detect(text: str) -> IntentResult:
             value = stripped[match.start(1):match.end(1)].strip().strip(".!?")
             if value:
                 return IntentResult(Intent.REMEMBER, argument=value, raw=raw, metadata={"key": key})
+
+    for pattern, capability in _CAPABILITY_PATTERNS:
+        match = pattern.search(folded)
+        if match:
+            argument = ""
+            if match.groups():
+                argument = stripped[match.start(1):match.end(1)].strip()
+            return IntentResult(
+                Intent.CAPABILITY, argument=argument, raw=raw,
+                metadata={"capability": capability},
+            )
 
     if _GREETING.search(folded):
         return IntentResult(Intent.GREETING, raw=raw)

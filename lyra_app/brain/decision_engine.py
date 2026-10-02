@@ -45,6 +45,12 @@ class DecisionEngine:
         if intent == Intent.IDENTITY_QUERY.value:
             return Decision(DecisionType.RESPOND, 0.9, "question about the AI itself")
 
+        if intent == Intent.CAPABILITY.value:
+            return Decision(
+                DecisionType.EXECUTE_ACTION, 0.85, "capability request",
+                metadata={"capability": getattr(context_state, "intent_metadata", {}).get("capability")},
+            )
+
         if intent in (Intent.GREETING.value, Intent.FAREWELL.value, Intent.EMPTY.value):
             return Decision(DecisionType.RESPOND, 0.9, "social or empty turn")
 

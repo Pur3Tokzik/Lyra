@@ -4,7 +4,7 @@ Standardized response format for all capabilities
 """
 
 from dataclasses import dataclass
-from typing import Mapping, Optional
+from typing import Any, Mapping, Optional
 from enum import Enum
 from types import MappingProxyType
 
@@ -54,7 +54,7 @@ class CapabilityResult:
     """Time taken to execute the capability (in seconds)"""
     
     # Additional metadata
-    metadata: Optional[Mapping[str, Any]]
+    metadata: Optional[Mapping[str, Any]] = None
     """Additional information about the execution"""
     
     def __post_init__(self):

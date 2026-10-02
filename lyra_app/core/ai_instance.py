@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 from lyra_app.brain.brain import Brain
+from lyra_app.capabilities.factory import build_default_manager
 from lyra_app.core.instance import InstanceData
 from lyra_app.core.persistence import InstanceStore
 from lyra_app.interface.i18n import Translator, normalize_language
@@ -32,6 +33,7 @@ class AIInstance:
         model_interface: ModelInterface,
         translator: Translator,
         brain: Brain,
+        capability_manager=None,
     ):
         self.data = data
         self.store = store
@@ -40,6 +42,7 @@ class AIInstance:
         self.model_interface = model_interface
         self.translator = translator
         self.brain = brain
+        self.capability_manager = capability_manager
 
     # -- accessors kept for a familiar API ------------------------------
 
@@ -114,6 +117,7 @@ class AIInstance:
 
             model = OllamaModelProvider(model_name=data.settings.model_name)
 
+        capabilities = build_default_manager(store.home, locale=data.identity.language)
         brain = Brain(
             memory_system=memory,
             model_interface=model,
@@ -121,8 +125,9 @@ class AIInstance:
             instance=data,
             journal=journal,
             store=store,
+            capability_manager=capabilities,
         )
-        return cls(data, store, memory, journal, model, translator, brain)
+        return cls(data, store, memory, journal, model, translator, brain, capabilities)
 
     # -- behaviour ------------------------------------------------------
 

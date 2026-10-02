@@ -88,5 +88,21 @@
     "playful": "Playful, energetic and always ready for a joke",
     "direct": "Honest, direct and straight to the point",
     "custom": "Custom personality defined by the user"
+  },
+  "capabilities": {
+    "none": "I don't have a capability system available right now.",
+    "empty": "No capabilities are installed yet.",
+    "header": "Available capabilities:",
+    "line": "- {name} ({state}): {description}",
+    "usage": "Usage: /capability enable|disable|install|remove <name>",
+    "unknown": "I don't know a capability called '{name}'.",
+    "unavailable": "The '{name}' capability is not enabled. You can turn it on with /capability enable {name}.",
+    "failed": "The '{name}' capability could not complete that.",
+    "enabled": "Capability '{name}' is now enabled.",
+    "enable_failed": "I couldn't enable '{name}'. It may need a permission you haven't granted.",
+    "disabled": "Capability '{name}' is now disabled.",
+    "installed": "Capability '{name}' is installed.",
+    "removed": "Capability '{name}' was removed.",
+    "reminder_set": "I'll remind you: {text}"
   }
 }
