@@ -107,6 +107,14 @@ memory.
 - `/journal edit <n>` and `/journal delete <n>` use 1-based positions in the
   recent-first listing. Journal commands are deliberately not journaled, or each
   view would shift the positions.
+- Journal recent-first order breaks timestamp ties by insertion order
+  (`get_entries` sorts ascending, then reverses). Never sort with a plain
+  `reverse=True`: Windows' clock is coarse (~15 ms), so entries written back to
+  back share an instant and a plain sort leaves them in insertion order.
+- Building a model never touches the network. `build_model` is pure
+  configuration; Ollama availability is probed lazily with a short timeout, only
+  when the brain decides free text. Creation must stay instant even where a dead
+  local port is slow to refuse.
 - `read_json_migrated` migrates data on load and reads newer `format_version`
   files forward-compatibly; never refuse a file just because its version is
   newer.
