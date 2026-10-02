@@ -83,3 +83,21 @@ def test_openai_provider_real_request():
     finally:
         thread.join(timeout=2)
         server.server_close()
+
+
+def test_build_model_does_not_touch_the_network(monkeypatch):
+    """Building a model must be pure configuration, never a network probe.
+
+    This is what keeps companion creation instant even where a dead local port
+    is slow to refuse (Windows). Availability is decided later, lazily.
+    """
+    import urllib.request
+
+    def _boom(*args, **kwargs):
+        raise AssertionError("build_model must not perform network I/O")
+
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    from lyra_app.model.ollama_model_provider import OllamaModelProvider
+
+    model = build_model("llama3.2:3b")
+    assert isinstance(model, OllamaModelProvider)

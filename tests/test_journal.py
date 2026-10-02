@@ -56,3 +56,20 @@ def test_journal_edit_delete_persist(tmp_path):
     assert reloaded.entry_at(1).content == "hello there"
     reloaded.delete_entry(1)
     assert Journal(data_dir=str(tmp_path)).get_entries() == []
+
+
+def test_journal_recent_first_survives_coarse_clock(tmp_path):
+    """Windows' clock has ~15 ms resolution; two entries can share an instant."""
+    from datetime import datetime
+
+    from lyra_app.journal.entities import ConversationEntry
+
+    journal = Journal(data_dir=str(tmp_path))
+    same_instant = datetime(2026, 10, 2, 12, 0, 0)
+    journal.add_entry(ConversationEntry(same_instant, "conversation", "first", "c1", "user"))
+    journal.add_entry(ConversationEntry(same_instant, "conversation", "second", "c1", "ai"))
+
+    # Same timestamp must not scramble the recent-first order: the newest
+    # insertion is position 1.
+    assert journal.entry_at(1).content == "second"
+    assert journal.entry_at(2).content == "first"

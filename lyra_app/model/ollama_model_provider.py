@@ -16,6 +16,10 @@ from typing import Any, Dict, List, Optional
 from lyra_app.model.entities import ModelResponse
 from lyra_app.model.model_interface import ModelInterface, ModelUnavailable
 
+# How long the lazy availability probe may wait. Kept short so a missing or
+# dead local server degrades to reduced mode quickly instead of hanging.
+_PROBE_TIMEOUT = 0.5
+
 
 class OllamaModelProvider(ModelInterface):
     """Talks to a local Ollama server over HTTP."""
@@ -48,11 +52,20 @@ class OllamaModelProvider(ModelInterface):
             return json.loads(response.read().decode("utf-8"))
 
     def is_available(self) -> bool:
-        try:
-            self._request("/api/tags", timeout=3.0)
-            self._available = True
-        except (urllib.error.URLError, OSError, ValueError):
-            self._available = False
+        """Whether the local server can be reached.
+
+        The check is lazy: nothing is probed when the provider is built, so
+        creating a companion never waits on the network. The first time the
+        brain actually needs the model, we probe once with a short timeout and
+        remember the answer. A missing server then falls back to reduced mode
+        in well under a second instead of stalling startup.
+        """
+        if self._available is None:
+            try:
+                self._request("/api/tags", timeout=_PROBE_TIMEOUT)
+                self._available = True
+            except (urllib.error.URLError, OSError, ValueError):
+                self._available = False
         return bool(self._available)
 
     def generate(
