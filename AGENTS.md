@@ -59,9 +59,21 @@ memory.
 - `memory/` — facts, retrieval, repository and graph.
 - `journal/` — conversation and event history.
 - `model/` — one `ModelInterface`, `OllamaModelProvider` and `NoModel`.
-- `core/` — instance data, persistence, onboarding, factory.
-- `interface/` — i18n and CLI.
+- `core/` — instance data, persistence, onboarding, factory, plus internal
+  state, dreams, objectives, hardware and model catalogue.
+- `capabilities/` — runtime (state, manager, executor, factory) and built-ins
+  (`clock`, `calculator`, `reminder`, `weather`).
+- `interface/` — i18n, CLI, visual identity (`visual.py`) and local web GUI
+  (`gui.py` + `web/index.html`).
 - `locales/` — `en`, `pt_PT`, `pt_BR`.
+
+## Instance folder
+
+```
+identity/  personality/  memory/  journal/  settings/
+state/state.json      capabilities.json      goals/goals.json
+assets/               (visual identity travels with the companion)
+```
 
 ## Gotchas
 
