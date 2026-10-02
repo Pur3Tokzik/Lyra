@@ -49,3 +49,49 @@ def test_save_settings_only_touches_settings(tmp_path):
 
     assert json.dumps(read_json(store.identity_file), sort_keys=True) == identity_before
     assert read_json(store.settings_file)["settings"]["model_name"] == "mistral"
+
+
+def test_migrate_stamps_version_and_keeps_data():
+    from lyra_app.core.persistence import FORMAT_VERSION, migrate_payload, payload_version
+
+    legacy = {"identity": {"name": "Aurora"}}  # no format_version (v1)
+    assert payload_version(legacy) == FORMAT_VERSION
+    migrated = migrate_payload(dict(legacy))
+    assert migrated["format_version"] == FORMAT_VERSION
+    assert migrated["identity"] == {"name": "Aurora"}
+
+
+def test_newer_format_is_read_forward_compatible():
+    from lyra_app.core.persistence import FORMAT_VERSION, migrate_payload
+
+    future = {"format_version": FORMAT_VERSION + 5, "identity": {"name": "Nova"}}
+    result = migrate_payload(dict(future))
+    assert result["identity"] == {"name": "Nova"}
+    assert result["format_version"] == FORMAT_VERSION + 5
+
+
+def test_garbage_version_does_not_crash():
+    from lyra_app.core.persistence import FORMAT_VERSION, payload_version
+
+    assert payload_version({"format_version": "not-a-number"}) == FORMAT_VERSION
+    assert payload_version([]) == FORMAT_VERSION
+
+
+def test_load_reads_legacy_identity_file(tmp_path):
+    import json
+
+    from lyra_app.core.persistence import InstanceStore
+
+    home = tmp_path / "home"
+    (home / "identity").mkdir(parents=True)
+    # A hand-written v1 file without format_version must still load.
+    (home / "identity" / "identity.json").write_text(
+        json.dumps({"identity": {"name": "Old", "language": "pt_PT"}}), encoding="utf-8"
+    )
+    (home / "personality").mkdir()
+    (home / "personality" / "personality.json").write_text(
+        json.dumps({"personality": {"selected_type": "chill"}}), encoding="utf-8"
+    )
+    data = InstanceStore(home).load()
+    assert data.identity.name == "Old"
+    assert data.personality.selected_type == "chill"

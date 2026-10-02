@@ -7,9 +7,27 @@ Lyra is the system, not the AI. The companion you create has the name you choose
 lives in a folder on your computer, and can be copied to another machine like a
 save game.
 
-## Status: 0.0.4
+## Status: 0.0.6
 
-0.0.4 makes the companion able to keep evolving on its own, and to run well on
+0.0.6 makes the language layer scale to any locale, gives the person full control of the journal, hardens the local GUI and redesigns the chat. 0.0.5 closed the gaps the 0.0.4 README listed under "Still ahead" (phases S–W),
+and adds the two things you asked for: behaviour that adapts to the person, and a
+name that is only a default.
+
+- Objectives that shape behaviour: active objectives enter the context and the
+  model prompt, with `/goal pause|resume <id>`. They bias attention; they never
+  override you.
+- Capability packages: install your own with `/capability install <path>` and
+  share one with `/capability export <name>`. Nothing is installed or enabled
+  silently, and a permission gate protects anything that declares permissions.
+- Voice, off by default: text to speech through a local engine, `/voice on|off`.
+  With no engine it says so instead of pretending.
+- Guided model download: `/model pull [name]` and the installer offer to fetch
+  the recommended model — only after you agree.
+- Learned behaviour: the companion adapts to how you want it to behave (tone,
+  length, formality). See `docs/PREFERENCES.md`.
+- Customisable name: `/name <new name>`, at any time. "Lyra" is only the default.
+
+0.0.4 made the companion able to keep evolving on its own, and to run well on
 any machine — including weak ones:
 
 - Autonomous maintenance: between conversations the instance reflects, consolidates
@@ -36,7 +54,8 @@ its own — simulated, and honest about it (phases G to N):
   never inventing events presented as real.
 - Objectives: internal goals with priority and status, always user-controlled.
 - Hardware profile detection and a local model recommendation.
-- Local web GUI (`--gui`) using only the standard library.
+- Local web GUI (`--gui`) using only the standard library, with a visual,
+  guided onboarding when no companion exists yet (REQ-010).
 
 And everything from 0.0.2 still holds:
 
@@ -53,17 +72,18 @@ And everything from 0.0.2 still holds:
 
 ## Still ahead
 
-Honest list of what 0.0.4 does not do yet. Each line is scheduled in
-`docs/PHASE_PLAN_0.0.5.md`, which is the plan of record for the next release.
+Honest list of what 0.0.6 does not do yet:
 
-- Objectives are stored but do not yet shape behaviour — planned in FASE S.
-- Capabilities cannot be added by the user, only the four built-ins exist —
-  planned in FASE T.
-- Voice is a setting with no implementation; the camera stays out of scope on
-  purpose (`docs/REQUIREMENTS.md`) — voice planned in FASE U.
-- Lyra suggests a model but never fetches it — planned in FASE V.
-- `install.sh` is only syntax-checked in CI, and cloud is tested against a local
-  HTTP server rather than a live provider — planned in FASE W.
+- No remote capability registry. Sharing is by file: `/capability export` then
+  `/capability install <file>`. A hosted registry needs trust infrastructure and
+  is deliberately out of scope for now.
+- The camera stays out of scope on purpose (`docs/REQUIREMENTS.md`).
+- No embeddings or vector store: relevance stays deterministic and offline.
+- No streaming model output.
+- No mobile app yet. On a phone the companion would use a cloud model, because
+  the brain and the model are already separate; see `docs/MOBILE_AND_LINK.md`.
+- No Lyra Link yet. Connecting two computers is planned as a separate program,
+  not part of the core; see `docs/MOBILE_AND_LINK.md`.
 
 ## Requirements
 
@@ -88,7 +108,7 @@ python -m lyra_app --say "olá"     # one turn and exit
 python -m lyra_app --model llama3  # choose the Ollama model
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud model (weak machines)
 python -m lyra_app --home ./me     # choose the instance folder
-python -m lyra_app --gui           # local web GUI (http://127.0.0.1:8000)
+python -m lyra_app --gui           # local web GUI; visual onboarding if new
 python -m lyra_app --doctor        # analyse the environment and exit
 python -m lyra_app --version
 ```
@@ -100,9 +120,11 @@ the `LYRA_HOME` environment variable.
 
 ```
 /help, /memories, /remember <key> <value>, /forget <key>,
-/journal, /model <name>, /identity,
-/capabilities, /capability enable|disable|install|remove <name>,
-/state, /dreams, /goals, /goal <text>, /goal done <id>,
+/journal [edit <n> <text> | delete <n>], /model <name>, /model pull [name],
+/identity, /name <new name>,
+/capabilities, /capability enable|disable|install|remove|export <name>,
+/state, /dreams, /goals, /goal <text>, /goal done|pause|resume <id>,
+/voice on|off|say <text>, /preferences [set|forget],
 /hardware, /models, /doctor, /autonomy on|off|run, /quit
 ```
 
@@ -112,6 +134,10 @@ Local by default. Nothing leaves your machine unless you choose a cloud model,
 and Lyra never switches to the cloud on its own. There is no telemetry, no
 account and no analytics. See `docs/CLOUD_MODELS.md` for exactly what a cloud
 model changes.
+
+## License
+
+MIT. See `LICENSE`; the project is open source and forks are welcome (REQ-005).
 
 ## Tests
 

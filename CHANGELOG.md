@@ -1,5 +1,116 @@
 # Changelog
 
+## 0.0.6 — languages that scale, a journal you own, a harder GUI
+
+### Added
+
+- **Languages that open up without breaking** (REQ-059): the interface now
+  discovers every locale file in `locales/` instead of hard-coding three. Adding
+  a language is dropping a `xx.json` next to `en.json`; lookups fall back
+  `pt_BR` -> `pt` -> `en`, and a partial or corrupt file degrades to English
+  instead of crashing. `language_choices()` feeds the GUI and CLI onboarding, so
+  the menu grows with the files. The default trio stays en, pt_PT and pt_BR.
+- **Brazilian Portuguese in the brain** (REQ-012): intent rules now recognise
+  `você`, `celular`, `me chamo`, `curto`, `moro no`, `como está o tempo?`,
+  `que horas são agora?`, `me lembra de` and more, so a pt_BR user reaches the
+  local brain instead of falling through to the model.
+- **A journal you own** (fase E): `/journal edit <n> <text>` and
+  `/journal delete <n>` read, correct and erase entries. Reading or editing the
+  journal no longer records itself, so positions stay stable. New
+  `Journal.get_entries`, `entry_at`, `edit_entry`, `delete_entry`.
+- **Format migration on load**: `read_json_migrated` / `migrate_payload` stamp
+  the current `format_version`, run per-version migration steps, and read a
+  newer file forward-compatibly instead of refusing it (REQ-004, REQ-032).
+
+### Security
+
+- **Loopback GUI hardening** (REQ-001, REQ-002): a per-run session token gates
+  every state-changing request, `Host` is validated against loopback (DNS
+  rebinding), a foreign `Origin` is rejected, `Content-Type` must be
+  `application/json`, and responses carry `X-Frame-Options: DENY`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` and
+  `Cache-Control: no-store`. Nothing leaves the machine.
+
+### Changed
+
+- **Chat interface redesign**: simpler and more futuristic, built for a large
+  screen, a normal window, or a small always-around panel. A compact mode
+  shrinks the layout and remembers the choice in `localStorage`. Still no
+  framework and no build step.
+
+## 0.0.5 — objectives, capabilities, voice and learned behaviour
+
+### Added
+
+- **Objectives that shape behaviour** (FASE S): active objectives enter the
+  context and the model system prompt, so the companion knows what it is working
+  towards. `/goal pause <id>` and `/goal resume <id>` complete the lifecycle, and
+  creating or finishing an objective is journaled. An objective biases attention;
+  it never forces an action or overrides the user (VISION 19, REQ-066).
+- **Capability packages** (FASE T, `capabilities/packages.py`): a validated
+  `capability.json` manifest and a module, installed with
+  `/capability install <path>` into the instance's `modules/` folder and shared
+  with `/capability export <name>` as a `.lyra-capability` file. Trust levels and
+  an explicit permission gate (`LYRA_GRANTED_PERMISSIONS`) before anything with
+  permissions is enabled. A broken package fails alone and is never loaded.
+- **Voice, off by default** (FASE U, `capabilities/builtin/voice.py`): text to
+  speech through a local engine (`espeak-ng`, `espeak`, `spd-say`). Registered
+  but never enabled on its own; `/voice on|off|say <text>`. With no engine it says
+  so instead of pretending. No dependency, no network.
+- **Guided model download** (FASE V, `core/model_pull.py`): `/model pull [name]`
+  and the installer offer to fetch the recommended model with `ollama pull`,
+  only after the person agrees. Lyra still never installs a model on its own
+  (REQ-009).
+- **Learned behaviour** (FASE X, `core/preferences.py`): a small, deterministic,
+  offline layer that reads how the person wants the companion to behave (tone,
+  length, formality, examples, step by step) and raises confidence on repetition.
+  It shapes style only — the user's current message always wins (VISION 6).
+  `/preferences` lists, sets and forgets.
+- **Customisable name**: `/name <new name>` changes the companion name at any
+  time and persists it. "Lyra" is only the default.
+- **Visual onboarding in the GUI** (REQ-010): `lyra --gui` on a folder with no
+  companion serves a guided onboarding page (`web/onboard.html`) instead of
+  failing. It asks the same questions as the terminal flow and writes the same
+  instance folder; on creation the page switches to the chat. The onboarding page
+  is localised in en, pt_PT and pt_BR, and creating the first companion is guarded
+  so a second request never overwrites it.
+- New commands in en, pt_PT and pt_BR: `/goal pause|resume`, `/capability
+  install|export`, `/voice`, `/preferences`, `/name`.
+
+### Changed
+
+- CI (FASE W) runs `install.sh` end to end (no Ollama, no systemd) and checks the
+  launcher, and gains an opt-in live cloud smoke test that skips without a key.
+- `examples/capabilities/hello/` is a starting point for writing a capability.
+
+### Fixed
+
+- Reconciled the design-baseline documents with the alignment document
+  (`Lyra_Documento_de_Alinhamento.docx`, section 11): removed the pasted
+  "Lyra MUST ..." block glued onto REQ-064, removed the leftover conversation
+  note before principle 16, and made REQ-058 and REQUIREMENTS §1 multiplatform
+  instead of Linux-only, and VISION section 33 no longer says Lyra is built
+  for Arch/CachyOS only.
+- `docs/ARCHITECTURE_DECISIONS.md` now records AD-002 (the LLM is a function, not
+  the system) and AD-003 (cross-platform core, developed on Windows).
+- `docs/ARCHITECTURE_ROADMAP.md` states that `REQUIREMENTS.md` §14 sets the build
+  order where the two disagree, and points to the 0.0.5 phase plan.
+- `LYRA_BRAIN.md` §14.1 makes explicit what the brain answers without a model,
+  closing the gap the alignment document notes between principles 5 and 7 (which
+  say "only when needed") and the lack of a concrete list.
+- Closed the three open decisions in the alignment document §12: the interface
+  order is CLI first with the GUI alongside (REQ-010, REQ-055); the instance
+  folder stays `~/.lyra`, portable and overridable (new AD-004); and the license
+  is MIT (REQ-005), stated in `README.md` and already in `LICENSE` and
+  `pyproject.toml`.
+
+### Docs
+
+- `docs/CAPABILITIES.md` (write and share a capability), `docs/PREFERENCES.md`
+  (learned behaviour), and the 0.0.5 phase plan marked done.
+- A test now installs, enables and runs the shipped `examples/capabilities/hello`
+  package, so the example cannot rot.
+
 ## 0.0.4 — autonomy, cloud models and easy install
 
 ### Added

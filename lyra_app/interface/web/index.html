@@ -6,88 +6,124 @@
 <title>__NAME__</title>
 <style>
   :root {
-    --bg: #0b0f1a;
-    --panel: rgba(20, 26, 42, 0.72);
-    --panel-border: rgba(120, 160, 255, 0.18);
-    --text: #e8ecf7;
-    --muted: #93a0c0;
+    --bg: #070a12;
+    --panel: rgba(18, 24, 40, 0.66);
+    --panel-border: rgba(120, 160, 255, 0.16);
+    --text: #e9edf8;
+    --muted: #8b98b8;
     --accent: #6ea8ff;
-    --user: #2a3552;
-    --lyra: rgba(40, 60, 110, 0.55);
+    --accent-2: #9b7bff;
+    --user: #27324f;
+    --lyra: rgba(38, 56, 104, 0.5);
+    --radius: 20px;
+    --max: 1120px;
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0; min-height: 100vh; color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     background:
-      radial-gradient(1200px 600px at 20% -10%, rgba(90,130,255,0.18), transparent),
-      radial-gradient(900px 500px at 100% 110%, rgba(180,90,255,0.14), transparent),
+      radial-gradient(1200px 620px at 18% -12%, rgba(90,130,255,0.20), transparent),
+      radial-gradient(1000px 560px at 104% 112%, rgba(180,90,255,0.15), transparent),
       var(--bg);
     display: flex; flex-direction: column; align-items: center;
+    transition: background .4s;
   }
   header {
-    width: 100%; max-width: 860px; padding: 22px 20px 6px;
+    width: 100%; max-width: var(--max); padding: 24px 22px 8px;
     display: flex; align-items: center; gap: 14px;
+    transition: max-width .35s ease, padding .35s ease;
   }
   .avatar {
-    width: 52px; height: 52px; border-radius: 16px; flex: none;
-    background: linear-gradient(145deg, var(--accent), #9b7bff);
-    box-shadow: 0 0 26px rgba(110,168,255,0.45);
-    transition: box-shadow .4s, filter .4s;
+    width: 54px; height: 54px; border-radius: 17px; flex: none;
+    background: linear-gradient(145deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 26px rgba(110,168,255,0.42);
+    transition: box-shadow .4s, filter .4s, width .35s, height .35s;
     overflow: hidden;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .avatar[data-state="focused"] { box-shadow: 0 0 30px rgba(110,255,190,0.5); filter: hue-rotate(70deg); }
   .avatar[data-state="curious"] { box-shadow: 0 0 30px rgba(255,210,110,0.5); filter: hue-rotate(-40deg); }
   .avatar[data-state="operational_frustration"] { filter: saturate(0.4); }
-  h1 { font-size: 1.15rem; margin: 0; font-weight: 600; }
-  .meta { color: var(--muted); font-size: .8rem; margin-top: 2px; }
+  .title { min-width: 0; }
+  h1 { font-size: 1.12rem; margin: 0; font-weight: 600; letter-spacing: .01em; }
+  .meta { color: var(--muted); font-size: .78rem; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .actions { margin-left: auto; display: flex; gap: 8px; }
+  .icon-btn {
+    border: 1px solid var(--panel-border); background: var(--panel); color: var(--muted);
+    border-radius: 12px; padding: 8px 12px; cursor: pointer; font: inherit; font-size: .78rem;
+    backdrop-filter: blur(10px); transition: color .2s, border-color .2s;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--accent); }
   main {
-    width: 100%; max-width: 860px; flex: 1; padding: 8px 20px 20px;
-    display: flex; flex-direction: column;
+    width: 100%; max-width: var(--max); flex: 1; padding: 8px 22px 22px;
+    display: flex; flex-direction: column; min-height: 0;
+    transition: max-width .35s ease, padding .35s ease;
   }
   #log {
-    flex: 1; min-height: 52vh; overflow-y: auto; padding: 14px;
+    flex: 1; min-height: 46vh; overflow-y: auto; padding: 16px;
     background: var(--panel); border: 1px solid var(--panel-border);
-    border-radius: 18px; backdrop-filter: blur(14px);
+    border-radius: var(--radius); backdrop-filter: blur(16px);
+    scroll-behavior: smooth;
   }
-  .msg { margin: 8px 0; display: flex; }
+  .msg { margin: 9px 0; display: flex; }
   .msg.user { justify-content: flex-end; }
   .bubble {
-    max-width: 76%; padding: 10px 14px; border-radius: 14px;
-    line-height: 1.45; white-space: pre-wrap; word-wrap: break-word;
+    max-width: 74%; padding: 11px 15px; border-radius: 15px;
+    line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
   }
-  .msg.user .bubble { background: var(--user); border-bottom-right-radius: 4px; }
-  .msg.lyra .bubble { background: var(--lyra); border-bottom-left-radius: 4px; }
-  .tag { color: var(--muted); font-size: .7rem; margin-top: 4px; }
+  .msg.user .bubble { background: var(--user); border-bottom-right-radius: 5px; }
+  .msg.lyra .bubble { background: var(--lyra); border-bottom-left-radius: 5px; }
+  .tag { color: var(--muted); font-size: .68rem; margin-top: 4px; opacity: .8; }
   form { display: flex; gap: 10px; margin-top: 14px; }
   input[type=text] {
-    flex: 1; padding: 13px 16px; border-radius: 14px; color: var(--text);
+    flex: 1; padding: 14px 16px; border-radius: 15px; color: var(--text);
     background: var(--panel); border: 1px solid var(--panel-border); outline: none;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px); font: inherit;
   }
-  input[type=text]:focus { border-color: var(--accent); }
-  button {
-    padding: 0 20px; border: none; border-radius: 14px; cursor: pointer;
-    background: linear-gradient(145deg, var(--accent), #9b7bff); color: #08101f;
-    font-weight: 700;
+  input[type=text]:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  button.send {
+    padding: 0 22px; border: none; border-radius: 15px; cursor: pointer;
+    background: linear-gradient(145deg, var(--accent), var(--accent-2)); color: #08101f;
+    font: inherit; font-weight: 700;
   }
-  button:disabled { opacity: .5; cursor: default; }
+  button.send:disabled { opacity: .5; cursor: default; }
+
+  /* Compact mode: a small always-around window, still fully usable. */
+  body.compact { align-items: stretch; }
+  body.compact header { max-width: 420px; padding: 14px 14px 6px; }
+  body.compact main { max-width: 420px; padding: 6px 14px 14px; }
+  body.compact .avatar { width: 38px; height: 38px; border-radius: 12px; }
+  body.compact h1 { font-size: .96rem; }
+  body.compact .meta { font-size: .7rem; }
+  body.compact #log { min-height: 30vh; padding: 12px; border-radius: 16px; }
+  body.compact .bubble { max-width: 88%; font-size: .9rem; }
+  body.compact input[type=text] { padding: 11px 13px; }
+  body.compact button.send { padding: 0 16px; }
+
+  @media (max-width: 560px) {
+    header, main { max-width: 100%; padding-left: 14px; padding-right: 14px; }
+    .bubble { max-width: 86%; }
+  }
 </style>
 </head>
 <body>
   <header>
     <div class="avatar" id="avatar" data-state="steady"></div>
-    <div>
+    <div class="title">
       <h1>__NAME__</h1>
       <div class="meta" id="meta">__LANGUAGE__ · __PERSONALITY__</div>
+    </div>
+    <div class="actions">
+      <button class="icon-btn" id="compact" type="button" title="__COMPACT_HINT__">__COMPACT__</button>
     </div>
   </header>
   <main>
     <div id="log"></div>
     <form id="composer" autocomplete="off">
       <input type="text" id="input" placeholder="__PLACEHOLDER__" aria-label="__PLACEHOLDER__">
-      <button id="send" type="submit">__SEND__</button>
+      <button class="send" id="send" type="submit">__SEND__</button>
     </form>
   </main>
 <script>
@@ -95,10 +131,14 @@
   const avatar = document.getElementById('avatar');
   const input = document.getElementById('input');
   const send = document.getElementById('send');
+  const compactBtn = document.getElementById('compact');
+  const TOKEN = "__TOKEN__";
   const T = {
     thinking: "__THINKING__",
     error: "__ERROR__",
-    state: "__STATE_LABEL__"
+    state: "__STATE_LABEL__",
+    compact: "__COMPACT__",
+    expand: "__EXPAND__"
   };
 
   function add(text, who, tag) {
@@ -117,6 +157,19 @@
     log.scrollTop = log.scrollHeight;
     return wrap;
   }
+
+  function applyCompact(on) {
+    document.body.classList.toggle('compact', on);
+    compactBtn.textContent = on ? T.expand : T.compact;
+    try { localStorage.setItem('lyra.compact', on ? '1' : '0'); } catch (e) {}
+  }
+
+  compactBtn.addEventListener('click', () => {
+    applyCompact(!document.body.classList.contains('compact'));
+  });
+  let storedCompact = null;
+  try { storedCompact = localStorage.getItem('lyra.compact'); } catch (e) {}
+  applyCompact(storedCompact === '1');
 
   async function refreshState() {
     try {
@@ -143,7 +196,7 @@
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'X-Lyra-Token': TOKEN},
         body: JSON.stringify({text: text})
       });
       const data = await res.json();

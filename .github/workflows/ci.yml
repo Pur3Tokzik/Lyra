@@ -37,3 +37,22 @@ jobs:
         run: bash -n install.sh
       - name: Help output is sane
         run: ./install.sh --help
+
+  installer-e2e:
+    name: install.sh end to end (no Ollama, no systemd)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run the installer non-interactively
+        run: |
+          export LYRA_DATA_DIR="$RUNNER_TEMP/lyra-data"
+          export PATH="$HOME/.local/bin:$PATH"
+          ./install.sh --yes --no-ollama --no-service
+      - name: The launcher works
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          lyra --version
+          lyra --doctor || true

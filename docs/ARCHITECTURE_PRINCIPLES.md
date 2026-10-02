@@ -226,8 +226,6 @@ exported AI instances
 
 Lyra never depends on online services to preserve the AI.
 
-Acho que ainda acrescentaria um princípio que, pelas nossas conversas, é um dos mais importantes e praticamente define a Lyra:
-
 16. Intelligence Is Not The Model
 The Brain is the intelligence.
 

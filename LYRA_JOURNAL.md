@@ -3,7 +3,7 @@
 ## Project Identity
 
 Project: Lyra
-Version: 0.0.4
+Version: 0.0.6
 
 Purpose:
 Sistema de inteligência artificial local, gratuito e open source,
@@ -16,6 +16,53 @@ da instância, em `journal/`. Ver `docs/README.MD`.
 ---
 
 # Development Log
+
+## 2026-10-02 — 0.0.6
+
+### Entregue
+
+- Camada de idiomas extensível (`interface/i18n.py`): descobre os ficheiros de
+  locale, fallback `xx_YY -> xx -> en`; os menus crescem com os ficheiros.
+- pt_BR no cérebro: regras de intenção brasileiras.
+- Diário controlado pelo utilizador: `/journal edit <n>` e `/journal delete <n>`.
+- Migração de `format_version` no load (`core/persistence.py`), com leitura
+  compatível para a frente.
+- GUI local endurecida: token de sessão, validação de `Host`/`Origin`,
+  `Content-Type` estrito, headers de segurança.
+- GUI redesenhada: simples, futurista, com modo compacto.
+- Docs: `AUDIT_0.0.6.md` (prontidão ~93%, testabilidade ~88%) e
+  `MOBILE_AND_LINK.md` (iOS/Android e Lyra Link como programa/repo separado).
+
+### Validado
+
+- 174 testes a passar, 1 ignorado, sem Ollama e sem rede externa.
+- Smoke test real do servidor: token, headers, 403 sem token e com `Host` falso.
+
+### Próximo
+
+- Mobile iOS/Android e Lyra Link (ver `docs/MOBILE_AND_LINK.md`).
+- Teste manual de arranque em Windows e macOS; testes end-to-end de copiar a
+  pasta da instância.
+
+## 2026-10-02 — 0.0.5
+
+### Entregue
+
+- Objetivos que moldam o comportamento (FASE S), com `/goal pause|resume`.
+- Pacotes de capacidade (FASE T) com manifesto validado e gate de permissões.
+- Voz desligada por omissão (FASE U), sem dependências nem rede.
+- Download guiado de modelo (FASE V), só depois de a pessoa concordar.
+- Comportamento aprendido (FASE X), determinístico e offline.
+- Nome personalizável (`/name`) e onboarding visual na GUI.
+- Docs: `PHASE_PLAN_0.0.5.md`, `CAPABILITIES.md`, `PREFERENCES.md`.
+
+### Validado
+
+- 149 testes a passar (106 em 0.0.4). Sem Ollama e sem rede externa.
+
+### Próximo
+
+- Idiomas extensíveis, diário controlável, GUI endurecida (chegaram na 0.0.6).
 
 ## 2026-10-02 — 0.0.4
 

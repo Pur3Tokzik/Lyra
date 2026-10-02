@@ -155,8 +155,48 @@ class Journal:
     
     def get_recent_entries(self, limit: int = 10) -> List[JournalEntry]:
         """Get the most recent journal entries."""
-        return sorted(self.journal_data.entries, key=lambda x: x.timestamp, reverse=True)[:limit]
+        return self.get_entries(limit)
     
+    def get_entries(self, limit: Optional[int] = None) -> List[JournalEntry]:
+        """Most recent entries first; ``limit=None`` returns them all.
+
+        ``self.journal_data.entries`` is kept in insertion order. A stable
+        ascending sort by timestamp keeps that order for entries sharing an
+        instant, and reversing puts the newest insertion first. This matters
+        where the clock is coarse (Windows: ~15 ms): two entries written back
+        to back still get a deterministic recent-first order.
+        """
+        ordered = sorted(self.journal_data.entries, key=lambda e: e.timestamp)[::-1]
+        return ordered if limit is None else ordered[:limit]
+
+    def entry_at(self, position: int) -> Optional[JournalEntry]:
+        """The entry at a 1-based position in the recent-first listing."""
+        ordered = self.get_entries()
+        if 1 <= position <= len(ordered):
+            return ordered[position - 1]
+        return None
+
+    def edit_entry(self, position: int, new_content: str) -> bool:
+        """Rewrite the content of the entry at ``position``. Never invents data."""
+        entry = self.entry_at(position)
+        text = (new_content or "").strip()
+        if entry is None or not text:
+            return False
+        entry.content = text
+        self.journal_data.last_updated = datetime.now()
+        return self._save_journal()
+
+    def delete_entry(self, position: int) -> bool:
+        """Remove the entry at ``position``. Returns False if it does not exist."""
+        entry = self.entry_at(position)
+        if entry is None:
+            return False
+        self.journal_data.entries = [
+            candidate for candidate in self.journal_data.entries if candidate is not entry
+        ]
+        self.journal_data.last_updated = datetime.now()
+        return self._save_journal()
+
     def get_conversation_history(self, conversation_id: str) -> List[ConversationEntry]:
         """Get all entries for a specific conversation."""
         return [entry for entry in self.journal_data.entries 

@@ -649,9 +649,10 @@ A interface deve ser moderna e ligeiramente transparente.
 
 A transparência não deve prejudicar a leitura.
 
-A interface deve ser adequada ao ambiente de trabalho Linux.
-
-A Lyra será inicialmente desenvolvida com foco em Arch Linux e CachyOS.
+A interface deve ser adequada a Windows, Linux e macOS, sem depender de um
+sistema operativo específico. Linux (Arch, CachyOS, Debian/Ubuntu, Fedora) é
+o alvo principal de instalação, mas o núcleo e a interface são multiplataforma
+(REQ-058).
 
 A configuração deve ser semelhante a um instalador guiado.
 

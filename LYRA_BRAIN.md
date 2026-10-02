@@ -307,6 +307,36 @@ O cérebro deve controlar o fluxo geral da interação.
 
 A troca de modelo não deve destruir a identidade da Lyra.
 
+## 14.1 O que o cérebro responde sem o modelo
+
+O modelo só é chamado quando a decisão é gerar texto livre. Todo o resto é
+resolvido por regras, contexto e memória, para que a Lyra continue a existir
+sem LLM.
+
+Sem modelo, o cérebro trata:
+
+* comandos explícitos (memórias, journal, identidade, objetivos, capacidades,
+  modelo, ajuda, preferências, nome);
+* pedidos bloqueados pela guideline, recusados com a forma da personalidade;
+* perguntas sobre a própria IA (nome, personalidade, idioma, o que sabe);
+* factos guardados, como "como me chamo?";
+* guardar um facto dito de forma explícita, como "o meu nome é X";
+* saudações, despedidas e input vazio ou ambíguo, por template e personalidade;
+* onboarding e primeira apresentação, por fluxo guiado.
+
+Com modelo, o cérebro decide e o modelo escreve apenas:
+
+* conversa aberta, explicações, opinião, ajuda criativa ou de código;
+* classificação de intenção ambígua, quando a confiança das regras é baixa;
+* conversão de uma descrição Custom num perfil de personalidade, uma só vez.
+
+O modelo nunca decide se a Lyra responde, se recusa, o que guarda, nem qual é a
+identidade. A sua saída passa sempre pela guideline antes de chegar ao
+utilizador.
+
+Sem modelo ligado, a Lyra entra em modo reduzido e di-lo com honestidade, em vez
+de falhar ou inventar (VISION §30 e §31, REQ-006 a REQ-009).
+
 ---
 
 # 15. Personalidade

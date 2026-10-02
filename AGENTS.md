@@ -25,8 +25,8 @@ python -m lyra_app --say "olá"
 python -m lyra_app --home ./me --model llama3
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud (needs LYRA_CLOUD_API_KEY)
 python -m lyra_app --doctor        # environment check, no instance needed
-python -m lyra_app --gui           # local web GUI on :8000
-python -m pytest -q                # tests live in tests/; 106 expected
+python -m lyra_app --gui           # local web GUI on :8000 (visual onboarding if new)
+python -m pytest -q                # tests live in tests/; 175 collected (174 pass, 1 skip)
 ./install.sh --help                # installer is syntax-checked in CI
 ```
 
@@ -49,7 +49,9 @@ to another machine restores the companion.
 ```
 identity/  personality/  memory/  journal/  settings/
 state/state.json      capabilities.json      goals/goals.json
-autonomy/autonomy.json      assets/   (visual identity travels with the companion)
+autonomy/autonomy.json      preferences/preferences.json
+modules/   (installed capability packages)   exports/   (shared .lyra-capability)
+assets/   (visual identity travels with the companion)
 ```
 
 Changing the model only touches `settings/`, never identity, personality or
@@ -68,20 +70,27 @@ memory.
   `OpenAICompatibleProvider` and `AnthropicProvider` (cloud) and `NoModel`.
   Selected by spec in `core/lyra_factory.build_model`; `cloud:` prefix = cloud.
 - `core/` — instance data, persistence, onboarding, factory, plus internal
-  state, dreams, objectives, autonomy, hardware, doctor and model catalogue.
-- `capabilities/` — runtime (state, manager, executor, factory) and built-ins
-  (`clock`, `calculator`, `reminder`, `weather`).
+  state, dreams, objectives, autonomy, hardware, doctor, model catalogue,
+  guided model pull (`model_pull.py`) and learned behaviour
+  (`preferences.py`).
+- `capabilities/` — runtime (state, manager, executor, factory), local package
+  install/export (`packages.py`) and built-ins (`clock`, `calculator`,
+  `reminder`, `weather`, `voice`).
 - `interface/` — i18n, CLI, visual identity (`visual.py`) and local web GUI
-  (`gui.py` + `web/index.html`).
-- `locales/` — `en`, `pt_PT`, `pt_BR`.
+  (`gui.py` + `web/index.html` chat and `web/onboard.html` visual onboarding).
+  The GUI is hardened: a per-run token, loopback `Host` check, `Origin` check,
+  strict `Content-Type` and security headers gate every state-changing POST.
+- `locales/` — `en`, `pt_PT`, `pt_BR`. Add a language by dropping `xx.json`
+  here; `i18n` discovers it and the menus grow automatically.
 
 ## Documentation map
 
 - Current release docs: `README.md`, `docs/INSTALL.md`, `docs/CLOUD_MODELS.md`,
-  `docs/AUTONOMY.md`, `docs/PHASE_PLAN_0.0.4.md`,
-  `docs/RELEASE_NOTES_0.0.4.md`, `CHANGELOG.md`.
-- Next release plan: `docs/PHASE_PLAN_0.0.5.md` (phases S–W). The README's
-  "Still ahead" list maps one-to-one onto it; keep them in sync.
+  `docs/AUTONOMY.md`, `docs/CAPABILITIES.md`, `docs/PREFERENCES.md`,
+  `docs/PHASE_PLAN_0.0.5.md`, `docs/AUDIT_0.0.6.md`,
+  `docs/MOBILE_AND_LINK.md`, `CHANGELOG.md`.
+- Previous release docs: `docs/PHASE_PLAN_0.0.4.md`,
+  `docs/RELEASE_NOTES_0.0.4.md`.
 - Design baseline (written at 0.0.1, describes intent, not current state):
   `VISION.MD`, `docs/REQUIREMENTS.md`, `LYRA_BRAIN.md`, `ONBOARDING.MD`,
   `PERSONALITYBEHAVIOUR.md`, `docs/CAPABILITY_*.md`,
@@ -92,6 +101,19 @@ memory.
 ## Gotchas
 
 - Language is stored in `identity`, not in settings.
+- The locale layer discovers files dynamically and falls back `xx_YY -> xx ->
+  en`. Never hard-code the language list; use `available_languages()` /
+  `language_choices()`.
+- `/journal edit <n>` and `/journal delete <n>` use 1-based positions in the
+  recent-first listing. Journal commands are deliberately not journaled, or each
+  view would shift the positions.
+- `read_json_migrated` migrates data on load and reads newer `format_version`
+  files forward-compatibly; never refuse a file just because its version is
+  newer.
+- The GUI can start before the companion exists: `serve(None, home=...)` renders
+  the visual onboarding, and `/api/onboard` creates the instance and swaps the
+  handler to the chat page. The first creation is guarded so a second request
+  never overwrites a companion.
 - `NoModel` is a real backend; the brain answers honestly in reduced mode
   instead of failing.
 - The guideline must gate both input and model output.
@@ -101,3 +123,9 @@ memory.
 - Cloud API keys come from the environment only; never write them to disk.
 - `/model` switches the live backend and must update both `brain.model_interface`
   and `brain.executor.model_interface`.
+- Learned behaviour (`core/preferences.py`) shapes style only. It is deterministic
+  and offline, never calls a model, and never overrides the user's current message
+  or the guideline.
+- Capability packages are installed locally, never fetched. A manifest that
+  declares permissions cannot be enabled until they are granted via
+  `LYRA_GRANTED_PERMISSIONS`; a broken package is skipped, never loaded.

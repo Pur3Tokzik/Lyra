@@ -3,7 +3,7 @@
   "language_name": "Português (Brasil)",
   "onboarding": {
     "welcome": "Vamos criar a sua companhia. Ela vai morar neste computador e pertencer a você.",
-    "language_prompt": "Idioma (en, pt_PT, pt_BR) [pt_BR]: ",
+    "language_prompt": "Idioma ({languages}) [pt_BR]: ",
     "name_prompt": "Dê um nome à sua companhia: ",
     "address_prompt": "Como você quer que ela te chame? ",
     "personality_prompt": "Personalidade (friendly, chill, playful, direct, custom) [friendly]: ",
@@ -67,7 +67,7 @@
   "identity_human": "Não, eu não sou humana. Sou uma companhia de IA que roda no seu computador. Não finjo o contrário.",
   "reduced_mode": "No momento não tenho um modelo de linguagem conectado, por isso não consigo responder isso livremente. Ainda cuido de comandos, memória e coisas simples. Quer ver o que eu consigo fazer?",
   "commands": {
-    "help": "Comandos: /help, /memorias, /lembrar <chave> <valor>, /esquecer <chave>, /journal, /model <nome>, /identity, /sair.",
+    "help": "Comandos: /ajuda, /memorias, /lembrar <chave> <valor>, /esquecer <chave>, /diario, /modelo <nome> (ou /modelo baixar), /identidade, /objetivos, /objetivo <texto>, /capacidade ativar|instalar|exportar, /preferencias, /nome <novo nome>, /voz, /analise, /modelos, /autonomia, /sair.",
     "memory_header": "Memórias salvas:",
     "memory_empty": "Ainda não há memórias salvas.",
     "memory_forgot": "Esqueci '{key}'.",
@@ -80,7 +80,13 @@
     "memory_set": "Salvei '{key}'.",
     "memory_set_usage": "Use /lembrar <chave> <valor>, por exemplo /lembrar cidade Lisboa.",
     "model_ready": "pronto",
-    "model_offline": "inacessível no momento"
+    "model_offline": "inacessível no momento",
+    "journal_usage": "Use /journal para ler, /journal editar <n> <texto> para corrigir uma entrada, ou /journal apagar <n> para apagar uma.",
+    "journal_edit_usage": "Use /journal editar <n> <texto>, por exemplo /journal editar 1 Conheci a Ana hoje.",
+    "journal_delete_usage": "Use /journal apagar <n>, por exemplo /journal apagar 2.",
+    "journal_edited": "Entrada {position} do diário atualizada.",
+    "journal_deleted": "Entrada {position} do diário apagada.",
+    "journal_not_found": "Não encontrei a entrada {position} do diário."
   },
   "errors": {
     "model_error": "Algo deu errado ao falar com o modelo, então respondi o melhor que pude sem ele."
@@ -97,7 +103,7 @@
     "empty": "Ainda não há capacidades instaladas.",
     "header": "Capacidades disponíveis:",
     "line": "- {name} ({state}): {description}",
-    "usage": "Uso: /capacidade ativar|desativar|instalar|remover <nome>",
+    "usage": "Uso: /capacidade ativar|desativar|remover <nome>  |  /capacidade instalar <caminho>  |  /capacidade exportar <nome> [caminho]",
     "unknown": "Não conheço nenhuma capacidade chamada '{name}'.",
     "unavailable": "A capacidade '{name}' não está ativa. Você pode ligá-la com /capacidade ativar {name}.",
     "failed": "A capacidade '{name}' não conseguiu completar isso.",
@@ -106,7 +112,11 @@
     "disabled": "A capacidade '{name}' agora está desativada.",
     "installed": "A capacidade '{name}' está instalada.",
     "removed": "A capacidade '{name}' foi removida.",
-    "reminder_set": "Vou te lembrar: {text}"
+    "reminder_set": "Vou te lembrar: {text}",
+    "package_installed": "Capacidade '{name}' {version} instalada. Ative com /capacidade ativar {name}.",
+    "package_exported": "Capacidade '{name}' exportada para {path}.",
+    "package_error": "Erro no pacote de capacidade: {error}",
+    "permission_required": "A capacidade '{name}' precisa de permissão(ões): {permissions}. Conceda com LYRA_GRANTED_PERMISSIONS e tente de novo."
   },
   "state": {
     "none": "No momento não tenho estados internos disponíveis.",
@@ -125,7 +135,9 @@
     "added": "Objetivo [{id}] registrado: {text}",
     "completed": "O objetivo [{id}] está concluído.",
     "not_found": "Não tenho nenhum objetivo [{id}].",
-    "usage": "Uso: /objetivo <texto>  |  /objetivo concluir <id>"
+    "usage": "Uso: /objetivo <texto>  |  /objetivo concluir|pausar|retomar <id>",
+    "paused": "Objetivo [{id}] pausado.",
+    "resumed": "O objetivo [{id}] está ativo novamente."
   },
   "hardware": {
     "yes": "sim",
@@ -138,7 +150,28 @@
     "thinking": "…",
     "error": "Algo deu errado.",
     "state_label": "estado",
-    "greeting": "Oi, sou a {name}. Como posso ajudar?"
+    "greeting": "Oi, sou a {name}. Como posso ajudar?",
+    "title": "Vamos criar sua companheira",
+    "intro": "Ela vai viver neste computador e pertence a você.",
+    "language_label": "Idioma",
+    "name_label": "Nome da companheira",
+    "name_placeholder": "ex.: Aurora",
+    "address_label": "Como ela deve te chamar?",
+    "address_placeholder": "ex.: Pedro",
+    "personality_label": "Personalidade",
+    "custom_label": "Descreva a personalidade com suas palavras",
+    "custom_placeholder": "Calma, curiosa, um pouco sarcástica…",
+    "voice_label": "Ativar voz (opcional)",
+    "model_label": "Modelo",
+    "model_hint": "Deixe vazio para o modelo recomendado, ou use cloud:gpt-4o-mini para um modelo na nuvem.",
+    "create": "Criar",
+    "creating": "Criando…",
+    "first_memory": "Oi {user}. Sou a {name}. Estou aqui agora, e esta é minha primeira memória de você.",
+    "welcome_back": "Esta pasta já contém {name}.",
+    "onboard_error": "Dê um nome à sua companheira.",
+    "compact": "Compacto",
+    "expand": "Expandir",
+    "compact_hint": "Modo compacto"
   },
   "models": {
     "header": "Perfil da máquina: {profile}",
@@ -147,7 +180,10 @@
     "header_catalog": "Opções locais para este perfil:",
     "line": "- {name} ({size} GB): {note}",
     "cloud_hint": "Máquina fraca? Use um modelo na nuvem: /model cloud:gpt-4o-mini (defina LYRA_CLOUD_API_KEY antes).",
-    "none": "(nenhum - modo reduzido)"
+    "none": "(nenhum - modo reduzido)",
+    "pull_ok": "O modelo '{name}' está pronto ({detail}).",
+    "pull_failed": "Não consegui baixar '{name}': {detail}",
+    "pull_hint": "Baixe um modelo com: /model baixar [nome]"
   },
   "doctor": {
     "header": "Análise do ambiente (perfil: {profile})",
@@ -165,5 +201,25 @@
     "enabled": "A manutenção autônoma está ligada. Vou continuar refletindo offline.",
     "disabled": "A manutenção autônoma está desligada.",
     "ran": "Manutenção feita: {associations} associações, {consolidated} consolidadas, {links} ligações, {proposed} objetivos propostos."
+  },
+  "voice": {
+    "on": "Voz ligada.",
+    "off": "Voz desligada.",
+    "status": "Voz: {status} (motor: {engine})",
+    "no_engine": "nenhum motor local encontrado",
+    "said": "Dito: {text}"
+  },
+  "preferences": {
+    "empty": "Ainda não aprendi nenhuma preferência de estilo.",
+    "header": "Preferências aprendidas:",
+    "forgot": "Esqueci a preferência '{key}'.",
+    "unknown": "Não tenho a preferência '{key}'.",
+    "learned": "Preferência '{key}' definida como '{value}'.",
+    "usage": "Uso: /preferencias  |  /preferencias definir <chave> <valor>  |  /preferencias esquecer <chave>"
+  },
+  "name": {
+    "current": "Meu nome é {name}. Mude com /nome <novo nome>.",
+    "changed": "Agora meu nome é {name}.",
+    "too_long": "Esse nome é longo demais (máx. 40 caracteres)."
   }
 }

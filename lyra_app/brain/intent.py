@@ -61,6 +61,9 @@ _COMMANDS = {
     "models": ("/models", "/modelos", "modelos", "models"),
     "doctor": ("/doctor", "/analise", "/análise", "doctor", "diagnostico"),
     "autonomy": ("/autonomy", "/autonomia", "autonomia", "autonomy"),
+    "voice": ("/voice", "/voz", "voice", "voz"),
+    "preferences": ("/preferences", "/preferencias", "/preferências", "preferencias", "preferences"),
+    "name": ("/name", "/nome", "nome", "name"),
     "quit": ("/quit", "/sair", "/exit", "quit", "exit", "sair"),
 }
 _FORGET_PREFIXES = ("/forget ", "/esquecer ", "esquecer ", "forget ")
@@ -69,6 +72,9 @@ _MODEL_PREFIXES = ("/model ", "model ")
 _CAPABILITY_PREFIXES = ("/capability ", "/capacidade ", "capability ", "capacidade ")
 _GOAL_PREFIXES = ("/goal ", "/objetivo ", "goal ", "objetivo ")
 _AUTONOMY_PREFIXES = ("/autonomy ", "/autonomia ", "autonomy ", "autonomia ")
+_PREFERENCES_PREFIXES = ("/preferences ", "/preferencias ", "/preferências ")
+_NAME_PREFIXES = ("/name ", "/nome ")
+_JOURNAL_PREFIXES = ("/journal ", "/diario ", "/diário ")
 
 _EXIT = {"quit", "exit", "sair", "adeus", "tchau", "xau", "bye", "goodbye"}
 
@@ -80,13 +86,16 @@ _FAREWELL = re.compile(
 )
 
 _REMEMBER = [
-    (re.compile(r"\b(?:o meu nome e|meu nome e|eu chamo-me|chamo-me|eu sou o|eu sou a)\s+(.+)"), "user.name"),
+    (re.compile(r"\b(?:o meu nome e|meu nome e|eu chamo-me|chamo-me|eu sou o|eu sou a|"
+                r"me chamo|eu me chamo|pode me chamar de|pode me chamar)\s+(.+)"), "user.name"),
     (re.compile(r"\b(?:my name is|i am|i'm|call me)\s+(.+)"), "user.name"),
-    (re.compile(r"\b(?:o meu aniversario e|meu aniversario e|faco anos a)\s+(.+)"), "user.birthday"),
+    (re.compile(r"\b(?:o meu aniversario e|meu aniversario e|faco anos a|"
+                r"meu aniversario e)\s+(.+)"), "user.birthday"),
     (re.compile(r"\b(?:my birthday is)\s+(.+)"), "user.birthday"),
-    (re.compile(r"\b(?:eu moro em|moro em|eu vivo em|vivo em)\s+(.+)"), "user.location"),
+    (re.compile(r"\b(?:eu moro em|moro em|eu vivo em|vivo em|"
+                r"eu moro no|moro no|eu moro na|moro na)\s+(.+)"), "user.location"),
     (re.compile(r"\b(?:i live in|i'm from)\s+(.+)"), "user.location"),
-    (re.compile(r"\b(?:eu gosto de|gosto de|adoro)\s+(.+)"), "user.likes"),
+    (re.compile(r"\b(?:eu gosto de|gosto de|adoro|curto)\s+(.+)"), "user.likes"),
     (re.compile(r"\b(?:i like|i love)\s+(.+)"), "user.likes"),
 ]
 
@@ -94,26 +103,40 @@ _RECALL = re.compile(
     r"\b(?:como me chamo|qual e o meu nome|qual e o meu apelido|o que sabes sobre mim|"
     r"o que sabes de mim|lembras-te|te lembras|onde moro|onde vivo|onde e que moro|"
     r"onde e que vivo|qual e a minha morada|qual e a minha cidade|"
+    # Brazilian Portuguese: voce, celular, endereco, "sabe sobre mim".
+    r"como eu me chamo|o que voce sabe sobre mim|o que voce sabe de mim|"
+    r"voce lembra|voce se lembra|voce lembra de mim|o que voce lembra|"
+    r"onde eu moro|onde eu vivo|qual e o meu endereco|qual e o meu celular|"
+    r"qual e o meu telefone|qual o meu nome|qual o meu celular|"
+    r"quais sao as minhas memorias|quais sao minhas memorias|minhas memorias|"
+    r"sabe algo sobre mim|o que voce sabe|"
     r"what is my name|who am i|what do you know about me|do you remember|"
     r"where do i live|where i live|what is my location|what is my address)\b"
 )
 _IDENTITY = re.compile(
     r"\b(?:qual e o teu nome|como te chamas|quem es tu|es humana|es humano|"
-    r"es um robot|qual e a tua personalidade|what is your name|who are you|"
+    r"es um robot|qual e a tua personalidade|"
+    # Brazilian Portuguese forms.
+    r"qual e o seu nome|como voce se chama|quem e voce|voce e humana|voce e humano|"
+    r"voce e um robo|voce e uma ia|qual e a sua personalidade|"
+    r"what is your name|who are you|"
     r"are you human|are you a robot|your personality)\b"
 )
 
 # Capability requests: mapped to a capability name plus the raw argument.
 _CAPABILITY_PATTERNS = (
     (re.compile(r"\b(?:que horas sao|que horas e|diz-me as horas|"
+                r"que horas sao agora|me diz as horas|"
                 r"what time is it|what is the time)\b"), "clock"),
-    (re.compile(r"\b(?:que dia e hoje|data de hoje|what day is it|today's date|"
-                r"what is the date)\b"), "clock"),
+    (re.compile(r"\b(?:que dia e hoje|data de hoje|qual e a data de hoje|"
+                r"what day is it|today's date|what is the date)\b"), "clock"),
     (re.compile(r"\b(?:que tempo faz|tempo em|previsao do tempo|"
+                r"como esta o tempo|como esta o clima|previsao do clima|"
                 r"weather in|what's the weather|what is the weather)\b"), "weather"),
-    (re.compile(r"\b(?:calcula|quanto e|quanto da|calc|calculate)\s+(.+)"), "calculator"),
-    (re.compile(r"\b(?:lembra-me de|avisa-me de|set a reminder|"
-                r"remind me to|remind me)\s+(.+)"), "reminder"),
+    (re.compile(r"\b(?:calcula|quanto e|quanto da|quanto e que da|calc|calculate)\s+(.+)"), "calculator"),
+    (re.compile(r"\b(?:lembra-me de|avisa-me de|me lembra de|me avisa de|"
+                r"me lembra|me avisa|"
+                r"set a reminder|remind me to|remind me)\s+(.+)"), "reminder"),
 )
 
 
@@ -161,6 +184,24 @@ def detect(text: str) -> IntentResult:
             if lowered.startswith(prefix):
                 return IntentResult(
                     Intent.COMMAND, command="autonomy",
+                    argument=stripped[len(prefix):].strip(), raw=raw,
+                )
+        for prefix in _PREFERENCES_PREFIXES:
+            if lowered.startswith(prefix):
+                return IntentResult(
+                    Intent.COMMAND, command="preferences",
+                    argument=stripped[len(prefix):].strip(), raw=raw,
+                )
+        for prefix in _NAME_PREFIXES:
+            if lowered.startswith(prefix):
+                return IntentResult(
+                    Intent.COMMAND, command="name",
+                    argument=stripped[len(prefix):].strip(), raw=raw,
+                )
+        for prefix in _JOURNAL_PREFIXES:
+            if lowered.startswith(prefix):
+                return IntentResult(
+                    Intent.COMMAND, command="journal",
                     argument=stripped[len(prefix):].strip(), raw=raw,
                 )
         first = lowered.split()[0]

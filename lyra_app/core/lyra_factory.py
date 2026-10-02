@@ -37,6 +37,12 @@ def build_model(
     - ``cloud:<name>`` — cloud model. Uses the Anthropic backend for
       ``cloud:claude...`` and an OpenAI-compatible backend otherwise.
     - anything else — a local Ollama model.
+
+    Building a model never touches the network. Availability is decided lazily
+    by ``is_available()``, and only when the brain actually decides to generate
+    free text. Cloud models are still returned as ``NoModel`` when unconfigured
+    (no key, no name), because that is a property of the configuration, not of
+    the network.
     """
     if not model_name:
         return NoModel()
@@ -44,8 +50,7 @@ def build_model(
     if model_name.startswith(_CLOUD_PREFIX):
         return _build_cloud(model_name[len(_CLOUD_PREFIX):], cloud_base_url, api_key)
 
-    provider = OllamaModelProvider(model_name=model_name)
-    return provider if provider.is_available() else NoModel()
+    return OllamaModelProvider(model_name=model_name)
 
 
 def _build_cloud(name: str, base_url: Optional[str], api_key: Optional[str]) -> ModelInterface:

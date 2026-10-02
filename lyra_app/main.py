@@ -94,6 +94,18 @@ def main(argv: Optional[list] = None) -> int:
     if args.doctor:
         return _run_doctor(args.home)
 
+    if args.gui:
+        # The GUI can start before the companion exists: it onboards visually.
+        target = args.home or default_home()
+        instance = None
+        if not args.new and InstanceStore(target).exists():
+            try:
+                instance = _load_instance(args)
+            except (ValueError, FileNotFoundError) as error:
+                print(f"Error: {error}", file=sys.stderr)
+                return 1
+        return _run_gui(instance, args.port, target)
+
     try:
         instance = _load_instance(args)
     except (ValueError, FileNotFoundError) as error:
@@ -102,8 +114,6 @@ def main(argv: Optional[list] = None) -> int:
 
     if args.say is not None:
         return _run_once(instance, args.say)
-    if args.gui:
-        return _run_gui(instance, args.port)
     return _run_interactive(instance)
 
 
@@ -122,10 +132,10 @@ def _run_doctor(home: Optional[str]) -> int:
     return 0
 
 
-def _run_gui(instance: AIInstance, port: int) -> int:
+def _run_gui(instance: Optional[AIInstance], port: int, home=None) -> int:
     from lyra_app.interface.gui import serve
 
-    httpd = serve(instance, port=port)
+    httpd = serve(instance, port=port, home=home)
     print(f"Lyra GUI on http://127.0.0.1:{port}  (Ctrl+C to stop)")
     try:
         httpd.serve_forever()

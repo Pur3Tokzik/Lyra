@@ -19,7 +19,9 @@ class ContextState:
                  relevant_memories: List[MemoryEntry] = None,
                  active_topic: Optional[str] = None,
                  user_intent: Optional[str] = None,
-                 timestamp: Optional[datetime] = None):
+                 timestamp: Optional[datetime] = None,
+                 active_objectives: Optional[List[Dict[str, Any]]] = None,
+                 active_preferences: Optional[List[Dict[str, Any]]] = None):
         """
         Initialize context state.
         
@@ -39,6 +41,10 @@ class ContextState:
         self.active_topic = active_topic
         self.user_intent = user_intent
         self.timestamp = timestamp or datetime.now()
+        # Objectives that shape attention. They bias, never command.
+        self.active_objectives = active_objectives or []
+        # Learned style preferences. They shape tone, never override the user.
+        self.active_preferences = active_preferences or []
         
     def __repr__(self):
         return (f"ContextState(conversation_id='{self.conversation_id}', "

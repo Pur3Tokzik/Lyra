@@ -1,0 +1,10 @@
+{
+  "name": "hello",
+  "version": "1.0",
+  "description": "A minimal example capability: greets a name.",
+  "entry": "hello.py",
+  "factory": "create",
+  "author": "community",
+  "permissions": [],
+  "trust": "community"
+}

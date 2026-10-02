@@ -63,3 +63,42 @@ def test_stable_key():
     assert intent.stable_key("o meu nome é X") == "user.name"
     assert intent.stable_key("moro em Lisboa") == "user.location"
     assert intent.stable_key("random sentence") is None
+
+
+# -- Brazilian Portuguese forms (REQ-012, REQ-059) -------------------------
+
+
+def test_recall_pt_br():
+    assert intent.detect("o que você sabe sobre mim?").intent == intent.Intent.RECALL
+    assert intent.detect("quais são minhas memórias?").intent == intent.Intent.RECALL
+    assert intent.detect("qual é o meu celular?").intent == intent.Intent.RECALL
+    assert intent.detect("onde eu moro?").intent == intent.Intent.RECALL
+    assert intent.detect("você lembra de mim?").intent == intent.Intent.RECALL
+
+
+def test_identity_pt_br():
+    assert intent.detect("qual é o seu nome?").intent == intent.Intent.IDENTITY_QUERY
+    assert intent.detect("quem é você?").intent == intent.Intent.IDENTITY_QUERY
+
+
+def test_remember_pt_br():
+    result = intent.detect("me chamo Pedro")
+    assert result.intent == intent.Intent.REMEMBER
+    assert result.metadata["key"] == "user.name"
+    assert result.argument == "Pedro"
+
+    result = intent.detect("eu me chamo Ana")
+    assert result.intent == intent.Intent.REMEMBER
+    assert result.argument == "Ana"
+
+    assert intent.detect("curto música").metadata["key"] == "user.likes"
+    assert intent.detect("moro no Rio de Janeiro").metadata["key"] == "user.location"
+
+
+def test_capabilities_pt_br():
+    assert intent.detect("que horas são agora?").metadata["capability"] == "clock"
+    assert intent.detect("como está o tempo?").metadata["capability"] == "weather"
+    result = intent.detect("me lembra de comprar pão")
+    assert result.intent == intent.Intent.CAPABILITY
+    assert result.metadata["capability"] == "reminder"
+    assert result.argument == "comprar pão"

@@ -76,9 +76,19 @@ class Objectives:
         return objective
 
     def complete(self, objective_id: str) -> bool:
+        return self._set_status(objective_id, _DONE)
+
+    def pause(self, objective_id: str) -> bool:
+        """Park an objective without losing it (reversible, never deletes)."""
+        return self._set_status(objective_id, _PAUSED)
+
+    def resume(self, objective_id: str) -> bool:
+        return self._set_status(objective_id, _ACTIVE)
+
+    def _set_status(self, objective_id: str, status: str) -> bool:
         for objective in self._items:
             if objective.id == objective_id:
-                objective.status = _DONE
+                objective.status = status
                 self._persist()
                 return True
         return False
