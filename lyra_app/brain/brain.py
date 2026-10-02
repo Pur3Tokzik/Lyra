@@ -43,6 +43,7 @@ class Brain:
         guideline: Optional[Guideline] = None,
         store=None,
         capability_manager=None,
+        state_store=None,
     ):
         self.memory_system = memory_system
         self.model_interface = model_interface
@@ -51,6 +52,8 @@ class Brain:
         self.journal = journal
         self.store = store
         self.capability_manager = capability_manager
+        self.state_store = state_store
+        self.internal_state = state_store.load() if state_store else None
         self.guideline = guideline or Guideline()
         self.decision_engine = DecisionEngine()
         self.context_manager = BasicContextManager(memory_system=memory_system)
@@ -104,8 +107,24 @@ class Brain:
         result["decision"] = str(decision.decision_type)
         result["text"] = self._execute(decision, context, intent, decision)
 
+        self._update_state(decision.decision_type)
         self._record(text, result["text"], conversation_id)
         return result
+
+    def _update_state(self, decision_type) -> None:
+        """Nudge the simulated internal state from the kind of turn it was."""
+        if self.internal_state is None:
+            return
+        if decision_type == DecisionType.CALL_LLM:
+            self.internal_state.adjust(interest=0.05, curiosity=0.03)
+        elif decision_type == DecisionType.EXECUTE_ACTION:
+            self.internal_state.adjust(focus=0.1, operational_frustration=-0.05)
+        elif decision_type == DecisionType.LOOKUP_MEMORY:
+            self.internal_state.adjust(focus=0.03)
+        elif decision_type == DecisionType.IGNORE:
+            self.internal_state.adjust(operational_frustration=0.05, focus=-0.05)
+        if self.state_store:
+            self.state_store.save(self.internal_state)
 
     # -- execution ------------------------------------------------------
 
@@ -256,6 +275,20 @@ class Brain:
                     result["text"] = "\n".join(lines)
         elif command == "capability":
             result["text"] = self._handle_capability_command(intent.argument)
+        elif command == "state":
+            if self.internal_state is None:
+                result["text"] = t.t("state.none")
+            else:
+                state = self.internal_state
+                result["text"] = t.t(
+                    "state.report",
+                    mood=state.describe(),
+                    curiosity=f"{state.curiosity:.2f}",
+                    focus=f"{state.focus:.2f}",
+                    interest=f"{state.interest:.2f}",
+                    frustration=f"{state.operational_frustration:.2f}",
+                    priority=f"{state.priority:.2f}",
+                )
         elif command == "quit":
             result["quit"] = True
             result["text"] = self.executor.respond_farewell()

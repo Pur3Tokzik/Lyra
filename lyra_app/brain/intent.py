@@ -54,6 +54,7 @@ _COMMANDS = {
     "journal": ("/journal", "/diario", "/diário", "diario", "diário", "journal"),
     "identity": ("/identity", "/identidade", "identidade", "identity"),
     "capabilities": ("/capabilities", "/capacidades", "capabilities", "capacidades"),
+    "state": ("/state", "/estado", "estado", "state"),
     "quit": ("/quit", "/sair", "/exit", "quit", "exit", "sair"),
 }
 _FORGET_PREFIXES = ("/forget ", "/esquecer ", "esquecer ", "forget ")

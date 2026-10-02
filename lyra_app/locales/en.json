@@ -104,5 +104,9 @@
     "installed": "Capability '{name}' is installed.",
     "removed": "Capability '{name}' was removed.",
     "reminder_set": "I'll remind you: {text}"
+  },
+  "state": {
+    "none": "I don't have internal states available right now.",
+    "report": "Operating state: {mood}. curiosity {curiosity}, focus {focus}, interest {interest}, operational frustration {frustration}, priority {priority}."
   }
 }

@@ -104,5 +104,9 @@
     "installed": "A capacidade '{name}' está instalada.",
     "removed": "A capacidade '{name}' foi removida.",
     "reminder_set": "Vou lembrar-te: {text}"
+  },
+  "state": {
+    "none": "Neste momento não tenho estados internos disponíveis.",
+    "report": "Estado de funcionamento: {mood}. curiosidade {curiosity}, foco {focus}, interesse {interest}, frustração operacional {frustration}, prioridade {priority}."
   }
 }
