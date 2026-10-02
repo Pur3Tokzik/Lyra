@@ -30,6 +30,15 @@ def test_recall_pt_en():
     assert intent.detect("Como me chamo?").intent == intent.Intent.RECALL
     assert intent.detect("O que sabes sobre mim?").intent == intent.Intent.RECALL
     assert intent.detect("what do you know about me?").intent == intent.Intent.RECALL
+    assert intent.detect("onde moro?").intent == intent.Intent.RECALL
+    assert intent.detect("where do I live?").intent == intent.Intent.RECALL
+
+
+def test_remember_location():
+    result = intent.detect("moro em Lisboa")
+    assert result.intent == intent.Intent.REMEMBER
+    assert result.metadata["key"] == "user.location"
+    assert result.argument == "Lisboa"
 
 
 def test_identity_pt_en():

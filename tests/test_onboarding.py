@@ -40,6 +40,19 @@ def test_create_is_portable_and_persistent(tmp_path):
     assert reopened.memory_system.get_fact("companion.name").content == "Nina"
 
 
+def test_custom_personality_keeps_description(tmp_path):
+    instance = onboarding.run(
+        tmp_path / "home",
+        onboarding.OnboardingInput(
+            language="pt_PT", name="Vega", user_address="Pedro",
+            personality="custom", custom_description="Calma e poética, fala devagar",
+        ),
+        model_interface=NoModel(),
+    )
+    text = instance.process("qual é o teu nome?")["text"]
+    assert "Calma e poética" in text
+
+
 def test_interactive_flow_uses_locale(tmp_path):
     answers = iter(["pt_PT", "Luna", "Pedro", "direct", "n"])
     instance = onboarding.run_interactive(

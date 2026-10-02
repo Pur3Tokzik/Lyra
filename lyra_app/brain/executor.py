@@ -44,6 +44,8 @@ class Executor:
 
     def _personality_description(self) -> str:
         kind = self._personality()
+        if kind == "custom" and self.instance.personality.custom_description:
+            return self.instance.personality.custom_description
         localized = self.translator.raw(f"personalities.{kind}")
         if isinstance(localized, str):
             return localized

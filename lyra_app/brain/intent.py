@@ -80,8 +80,10 @@ _REMEMBER = [
 
 _RECALL = re.compile(
     r"\b(?:como me chamo|qual e o meu nome|qual e o meu apelido|o que sabes sobre mim|"
-    r"o que sabes de mim|lembras-te|te lembras|what is my name|who am i|"
-    r"what do you know about me|do you remember)\b"
+    r"o que sabes de mim|lembras-te|te lembras|onde moro|onde vivo|onde e que moro|"
+    r"onde e que vivo|qual e a minha morada|qual e a minha cidade|"
+    r"what is my name|who am i|what do you know about me|do you remember|"
+    r"where do i live|where i live|what is my location|what is my address)\b"
 )
 _IDENTITY = re.compile(
     r"\b(?:qual e o teu nome|como te chamas|quem es tu|es humana|es humano|"
