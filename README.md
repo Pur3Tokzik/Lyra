@@ -53,14 +53,17 @@ And everything from 0.0.2 still holds:
 
 ## Still ahead
 
-Honest list of what 0.0.4 does not do yet:
+Honest list of what 0.0.4 does not do yet. Each line is scheduled in
+`docs/PHASE_PLAN_0.0.5.md`, which is the plan of record for the next release.
 
-- Voice and camera capabilities (interfaces exist, implementations do not).
-- The capability marketplace and third-party capability installation.
-- Richer objectives: the instance can propose them, but cannot yet act on one.
-- Automatic model download: Lyra suggests a model, it never installs it.
-- A test for `install.sh` on a real system (it is syntax-checked in CI only).
-- A live call to a real cloud provider (tested against a local HTTP server).
+- Objectives are stored but do not yet shape behaviour — planned in FASE S.
+- Capabilities cannot be added by the user, only the four built-ins exist —
+  planned in FASE T.
+- Voice is a setting with no implementation; the camera stays out of scope on
+  purpose (`docs/REQUIREMENTS.md`) — voice planned in FASE U.
+- Lyra suggests a model but never fetches it — planned in FASE V.
+- `install.sh` is only syntax-checked in CI, and cloud is tested against a local
+  HTTP server rather than a live provider — planned in FASE W.
 
 ## Requirements
 

@@ -80,6 +80,8 @@ memory.
 - Current release docs: `README.md`, `docs/INSTALL.md`, `docs/CLOUD_MODELS.md`,
   `docs/AUTONOMY.md`, `docs/PHASE_PLAN_0.0.4.md`,
   `docs/RELEASE_NOTES_0.0.4.md`, `CHANGELOG.md`.
+- Next release plan: `docs/PHASE_PLAN_0.0.5.md` (phases S–W). The README's
+  "Still ahead" list maps one-to-one onto it; keep them in sync.
 - Design baseline (written at 0.0.1, describes intent, not current state):
   `VISION.MD`, `docs/REQUIREMENTS.md`, `LYRA_BRAIN.md`, `ONBOARDING.MD`,
   `PERSONALITYBEHAVIOUR.md`, `docs/CAPABILITY_*.md`,
