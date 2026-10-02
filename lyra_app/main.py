@@ -77,6 +77,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--language", help="override language (en, pt_PT, pt_BR)")
     parser.add_argument("--say", help="process one message and exit")
     parser.add_argument("--new", action="store_true", help="force onboarding")
+    parser.add_argument("--gui", action="store_true", help="serve the local web GUI")
+    parser.add_argument("--port", type=int, default=8000, help="GUI port (default: 8000)")
     parser.add_argument("--version", action="store_true", help="print version and exit")
     return parser
 
@@ -95,7 +97,23 @@ def main(argv: Optional[list] = None) -> int:
 
     if args.say is not None:
         return _run_once(instance, args.say)
+    if args.gui:
+        return _run_gui(instance, args.port)
     return _run_interactive(instance)
+
+
+def _run_gui(instance: AIInstance, port: int) -> int:
+    from lyra_app.interface.gui import serve
+
+    httpd = serve(instance, port=port)
+    print(f"Lyra GUI on http://127.0.0.1:{port}  (Ctrl+C to stop)")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print()
+    finally:
+        httpd.server_close()
+    return 0
 
 
 if __name__ == "__main__":

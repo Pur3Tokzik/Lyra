@@ -128,5 +128,13 @@
     "yes": "yes",
     "no": "no",
     "report": "Machine profile: {profile} ({cores} cores, {ram} GB RAM, GPU: {gpu}). Recommended local model: {model} — {reason}."
+  },
+  "gui": {
+    "placeholder": "Write to Lyra…",
+    "send": "Send",
+    "thinking": "…",
+    "error": "Something went wrong.",
+    "state_label": "state",
+    "greeting": "Hi, I'm {name}. How can I help?"
   }
 }
