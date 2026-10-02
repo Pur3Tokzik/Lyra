@@ -69,8 +69,8 @@ class BaseCapability(ABC):
             Standardized result object containing execution outcome
             
         Note: This is the only method that performs actual work.
-        It must not make decisions or modify identity - this is delegated
-        to the decision engine through CognitivePipeline.
+        It must not make decisions or modify identity - those belong to the
+        brain, which decides before any capability is invoked.
         """
         pass
     

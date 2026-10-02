@@ -26,7 +26,7 @@ python -m lyra_app --home ./me --model llama3
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud (needs LYRA_CLOUD_API_KEY)
 python -m lyra_app --doctor        # environment check, no instance needed
 python -m lyra_app --gui           # local web GUI on :8000 (visual onboarding if new)
-python -m pytest -q                # tests live in tests/; 175 collected (174 pass, 1 skip)
+python -m pytest -q                # tests live in tests/; 177 collected (176 pass, 1 skip)
 ./install.sh --help                # installer is syntax-checked in CI
 ```
 
