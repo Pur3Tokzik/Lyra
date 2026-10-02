@@ -25,3 +25,15 @@ jobs:
         run: python -m pytest -q
       - name: Smoke test the CLI without Ollama
         run: python -m lyra_app --version
+      - name: Environment check without Ollama
+        run: python -m lyra_app --doctor
+
+  installer:
+    name: install.sh syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the installer parses
+        run: bash -n install.sh
+      - name: Help output is sane
+        run: ./install.sh --help

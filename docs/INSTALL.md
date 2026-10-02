@@ -56,6 +56,32 @@ Or run it without installing anything:
 python -m lyra_app
 ```
 
+## Windows and macOS
+
+`install.sh` is Linux-only. On Windows and macOS, Lyra runs the same way; there
+is just no guided script.
+
+Windows (PowerShell):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install .
+lyra --doctor
+```
+
+macOS:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install .
+lyra --doctor
+```
+
+Or, without installing, from the project folder: `python -m lyra_app`. Ollama
+has its own installer for both systems at <https://ollama.com>.
+
 ## First run
 
 ```bash

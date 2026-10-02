@@ -34,6 +34,23 @@
 - `/model <name>` now switches the live backend (local or cloud) and reports
   whether it is reachable.
 
+### Fixed
+
+- `/autonomy run` did not run: the argument was not propagated by intent
+  detection (`_AUTONOMY_PREFIXES`).
+- The interactive onboarding test needed the new model step's answer.
+
+### Numbers
+
+- 106 tests passing (up from 87 in 0.0.3).
+- Still 0 third-party dependencies in the core.
+- Release notes in `docs/RELEASE_NOTES_0.0.4.md`.
+
+### Still ahead
+
+Voice and camera capabilities, the capability marketplace, objectives the
+instance can act on, and automatic model download.
+
 ## 0.0.3 — capabilities, states, dreams and a face
 
 Follows phases G to N of the alignment document (02/10/2026).

@@ -51,6 +51,17 @@ And everything from 0.0.2 still holds:
 - One model abstraction (Ollama over `urllib`), used only when the decision is
   to generate free text.
 
+## Still ahead
+
+Honest list of what 0.0.4 does not do yet:
+
+- Voice and camera capabilities (interfaces exist, implementations do not).
+- The capability marketplace and third-party capability installation.
+- Richer objectives: the instance can propose them, but cannot yet act on one.
+- Automatic model download: Lyra suggests a model, it never installs it.
+- A test for `install.sh` on a real system (it is syntax-checked in CI only).
+- A live call to a real cloud provider (tested against a local HTTP server).
+
 ## Requirements
 
 - Python 3.10 or newer.
@@ -92,11 +103,34 @@ the `LYRA_HOME` environment variable.
 /hardware, /models, /doctor, /autonomy on|off|run, /quit
 ```
 
+## Privacy
+
+Local by default. Nothing leaves your machine unless you choose a cloud model,
+and Lyra never switches to the cloud on its own. There is no telemetry, no
+account and no analytics. See `docs/CLOUD_MODELS.md` for exactly what a cloud
+model changes.
+
 ## Tests
 
 ```bash
 python -m pytest
 ```
+
+## Documentation
+
+Start at `docs/README.MD`. The pages that match the current version:
+
+- `docs/INSTALL.md` — install, first run, uninstall.
+- `docs/CLOUD_MODELS.md` — cloud models for weak machines.
+- `docs/AUTONOMY.md` — how the companion keeps evolving on its own.
+- `docs/PHASE_PLAN_0.0.4.md` — what 0.0.4 added, phase by phase.
+- `docs/RELEASE_NOTES_0.0.3.md` — the previous release.
+
+The original design documents (`VISION.MD`, `REQUIREMENTS.md`, `LYRA_BRAIN.md`,
+`ONBOARDING.MD`, `PERSONALITYBEHAVIOUR.md`, `docs/CAPABILITY_*.md`) were written
+against 0.0.1 and describe the intent that later phases implement. They are kept
+as-is on purpose; where they name a version, read it as "the design baseline",
+not as the current release.
 
 ## Layout
 

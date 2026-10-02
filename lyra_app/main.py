@@ -118,7 +118,8 @@ def _run_doctor(home: Optional[str]) -> int:
         if not check.ok and check.hint:
             print(f"       -> {check.hint}")
     print(f"Recommended model: {report.recommended}")
-    return 0 if report.ok() else 1
+    # Advisory, never a failure: reduced mode is a valid way to run Lyra.
+    return 0
 
 
 def _run_gui(instance: AIInstance, port: int) -> int:

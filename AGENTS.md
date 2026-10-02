@@ -23,7 +23,11 @@ Two rules that override everything:
 python -m lyra_app                 # interactive; onboards if no instance exists
 python -m lyra_app --say "olá"
 python -m lyra_app --home ./me --model llama3
-python -m pytest -q                # tests live in tests/
+python -m lyra_app --model cloud:gpt-4o-mini   # cloud (needs LYRA_CLOUD_API_KEY)
+python -m lyra_app --doctor        # environment check, no instance needed
+python -m lyra_app --gui           # local web GUI on :8000
+python -m pytest -q                # tests live in tests/; 106 expected
+./install.sh --help                # installer is syntax-checked in CI
 ```
 
 ## Conventions
@@ -71,13 +75,17 @@ memory.
   (`gui.py` + `web/index.html`).
 - `locales/` — `en`, `pt_PT`, `pt_BR`.
 
-## Instance folder
+## Documentation map
 
-```
-identity/  personality/  memory/  journal/  settings/
-state/state.json      capabilities.json      goals/goals.json
-assets/               (visual identity travels with the companion)
-```
+- Current release docs: `README.md`, `docs/INSTALL.md`, `docs/CLOUD_MODELS.md`,
+  `docs/AUTONOMY.md`, `docs/PHASE_PLAN_0.0.4.md`,
+  `docs/RELEASE_NOTES_0.0.4.md`, `CHANGELOG.md`.
+- Design baseline (written at 0.0.1, describes intent, not current state):
+  `VISION.MD`, `docs/REQUIREMENTS.md`, `LYRA_BRAIN.md`, `ONBOARDING.MD`,
+  `PERSONALITYBEHAVIOUR.md`, `docs/CAPABILITY_*.md`,
+  `docs/ARCHITECTURE_ROADMAP.md`. Do not bump the version in these by hand;
+  `docs/README.MD` explains how to read them.
+- `docs/README.MD` is the index; `CONTRIBUTING.md` is the contributor contract.
 
 ## Gotchas
 

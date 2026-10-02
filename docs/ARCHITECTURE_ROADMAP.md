@@ -1,4 +1,8 @@
-# LYRA 0.0.1 — Architecture Roadmap
+# LYRA — Architecture Roadmap
+
+> Design baseline written at 0.0.1. Statuses below are kept current; the project
+> itself is at 0.0.4. See `../CHANGELOG.md` and `PHASE_PLAN_0.0.4.md` for what
+> actually shipped.
 
 ## Vision
 
@@ -131,7 +135,7 @@ Capabilities:
 
 # FASE 10 — Context Intelligence Layer
 
-Status: In Progress
+Status: Completed (0.0.2)
 
 Purpose:
 Transform stored information into usable intelligence.
@@ -162,19 +166,29 @@ Capabilities:
 
 ---
 
-# Future Roadmap
+# Completed Roadmap
 
 ## FASE 11 — Personality & Identity Core
 
-Goal:
-Create a consistent AI identity.
+Status: Completed (0.0.2)
+Goal: Create a consistent AI identity.
 
 ## FASE 12 — Autonomous Behaviour Layer
 
-Goal:
-Enable proactive AI behaviour.
+Status: Completed (0.0.3, extended in 0.0.4)
+Goal: Enable proactive AI behaviour. Simulated states and objectives arrived in
+0.0.3; the offline autonomy loop arrived in 0.0.4.
 
 ## FASE 13 — Advanced Cognitive Architecture
 
-Goal:
-Develop higher-level reasoning and planning systems.
+Status: In progress
+Goal: Develop higher-level reasoning and planning systems.
+
+---
+
+# Where the later work is tracked
+
+Phases 14 onward (capability runtime, perception, dreams, autonomy, model choice,
+install) are sequenced in `PHASE_PLAN_0.0.3.md` (phases G–N) and
+`PHASE_PLAN_0.0.4.md` (phases O–R). Those files are the current source of truth
+for what comes next.
