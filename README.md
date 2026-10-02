@@ -7,7 +7,7 @@ Lyra is the system, not the AI. The companion you create has the name you choose
 lives in a folder on your computer, and can be copied to another machine like a
 save game.
 
-## Status: 0.0.5
+## Status: 0.0.6
 
 0.0.6 makes the language layer scale to any locale, gives the person full control of the journal, hardens the local GUI and redesigns the chat. 0.0.5 closed the gaps the 0.0.4 README listed under "Still ahead" (phases S–W),
 and adds the two things you asked for: behaviour that adapts to the person, and a

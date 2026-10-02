@@ -41,8 +41,8 @@ Recommended reading order:
 
 The design documents above were written against 0.0.1 and describe the intent
 that later phases implement. Where they name a version (`LYRA 0.0.1`, `FASE 10`,
-`FASE 11`), read it as the design baseline, not as the current release. The
-project is at 0.0.5; `CHANGELOG.md` and the phase plans track what actually
+`FASE 11`), read it as the design baseline, not as the current release.
+`CHANGELOG.md` and the phase plans track the current version and what actually
 shipped.
 
 The documentation should be considered the source of truth for architectural decisions.

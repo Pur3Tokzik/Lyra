@@ -53,6 +53,26 @@ para o modelo e ele é sempre cercado pela guideline.
   estrito, headers de segurança.
 - GUI redesenhada: simples, futurista, com modo compacto.
 
+## 3.1 Ficheiros antigos revistos contra a verdade
+
+A primeira passagem da auditoria só comparou código com filosofia. Faltava
+re-verificar se a documentação de versões antigas ainda dizia a verdade. Esta
+segunda passagem encontrou e corrigiu:
+
+| Ficheiro | O que dizia | Correção |
+| --- | --- | --- |
+| `README.md` | cabeçalho `## Status: 0.0.5` | `0.0.6` |
+| `docs/ARCHITECTURE_ROADMAP.md` | "the project itself is at 0.0.5" | aponta para o CHANGELOG em vez de fixar versão |
+| `docs/README.MD` | "The project is at 0.0.5" | aponta para o CHANGELOG |
+| `LYRA_JOURNAL.md` | `Version: 0.0.4`, sem registo de 0.0.5 nem 0.0.6 | `0.0.6` e as duas entradas acrescentadas |
+
+Confirmado que os sete pontos da secção 11 do alinhamento estão resolvidos:
+roadmap invertido, README otimista, texto colado no REQ-064, nota de conversa
+nos princípios, plataforma (Windows/Linux/macOS), lista do que o cérebro responde
+sem modelo (LYRA_BRAIN §14.1) e AD-002/AD-003 registadas (há também AD-004). O
+nome "Lyra" não está fixado como identidade da companheira: é só o valor por
+omissão, personalizável com `/name`.
+
 ## 4. Fora do âmbito (não conta para a prontidão)
 
 Capabilities remoto, câmara, embeddings/vector store, streaming, mobile e

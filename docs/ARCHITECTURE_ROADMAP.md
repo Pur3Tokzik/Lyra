@@ -1,8 +1,8 @@
 # LYRA — Architecture Roadmap
 
-> Design baseline written at 0.0.1. Statuses below are kept current; the project
-> itself is at 0.0.5. See `../CHANGELOG.md` and `PHASE_PLAN_0.0.5.md` for what
-> actually shipped.
+> Design baseline written at 0.0.1. The project has moved well past it: see
+> `../CHANGELOG.md` for the current version and the latest `PHASE_PLAN_*.md` for
+> what actually shipped. Statuses below are kept current.
 >
 > Note on ordering: this file was written before `REQUIREMENTS.md` §14, which
 > puts identity, onboarding and personality first. Where the two disagree, §14
