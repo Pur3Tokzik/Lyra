@@ -1,8 +1,8 @@
-"""Lyra 0.0.1 - Context State Definition"""
+"""Lyra 0.0.2 - Context State Definition"""
 
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from memory.entities import MemoryEntry
+from lyra_app.memory.entities import MemoryEntry
 
 class ContextState:
     """Represents the current context state for AI processing.

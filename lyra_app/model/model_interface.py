@@ -1,60 +1,67 @@
+"""The single model abstraction.
+
+One interface, implemented by the Ollama backend and by the no-model backend.
+Nothing else in the system knows which one is in use, so swapping or removing
+the model never changes identity, personality or memory.
 """
-Lyra 0.0.1 - Model Interface
-Abstract interface for communication with local language models.
-Prepared for integration with Ollama and other local model providers.
-"""
+
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
-from model.entities import ModelResponse
+from typing import Any, Dict, List, Optional
+
+from lyra_app.model.entities import ModelResponse
+
+
+class ModelUnavailable(RuntimeError):
+    """Raised when a model cannot be reached or is not configured."""
+
 
 class ModelInterface(ABC):
-    """Abstract interface for communication with local language models.
-    
-    This interface prepares integration with Ollama and other local model providers
-    without containing specific implementation details.
-    """
-    
+    """Abstract interface for a local language model."""
+
+    name: str = "model"
+
     @abstractmethod
-    def process_message(self, message: str, context: Optional[Dict[str, Any]] = None) -> ModelResponse:
-        """Send a message to the model and receive a response.
-        
-        Args:
-            message: The input message to send to the model
-            context: Additional context for processing
-            
-        Returns:
-            ModelResponse containing the response and metadata
-        """
-        pass
-    
+    def is_available(self) -> bool:
+        """Return True if the backend is ready to be called."""
+
     @abstractmethod
-    def configure_model(self, model_name: str, parameters: Dict[str, Any]) -> bool:
-        """Configure the model settings.
-        
-        Args:
-            model_name: Name of the model to use
-            parameters: Configuration parameters
-            
-        Returns:
-            True if configuration was successful
-        """
-        pass
-    
-    @abstractmethod
+    def generate(
+        self,
+        system_prompt: str,
+        user_message: str,
+        history: Optional[List[Dict[str, str]]] = None,
+        timeout: float = 60.0,
+    ) -> ModelResponse:
+        """Generate a reply from a system prompt and the user's message."""
+
+    def configure(self, model_name: str) -> bool:
+        """Point the backend at a different model. Returns True on success."""
+        return False
+
     def get_model_info(self) -> Dict[str, Any]:
-        """Get information about the current model.
-        
-        Returns:
-            Dictionary with model information
-        """
-        pass
-    
-    @abstractmethod
-    def is_model_available(self) -> bool:
-        """Check if the model backend is available.
-        
-        Returns:
-            True if model backend is ready for use
-        """
-        pass
+        return {"name": self.name, "available": self.is_available()}
+
+
+class NoModel(ModelInterface):
+    """The model you have when there is no model.
+
+    Keeps the companion alive in reduced mode: commands, memory, identity and
+    refusals still work; free conversation reports honestly that no model is
+    connected.
+    """
+
+    name = "none"
+
+    def is_available(self) -> bool:
+        return False
+
+    def generate(
+        self,
+        system_prompt: str,
+        user_message: str,
+        history: Optional[List[Dict[str, str]]] = None,
+        timeout: float = 60.0,
+    ) -> ModelResponse:
+        raise ModelUnavailable("no language model is connected")

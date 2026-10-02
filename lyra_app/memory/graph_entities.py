@@ -1,4 +1,4 @@
-"""Lyra 0.0.1 - Memory Graph Entities"""
+"""Lyra 0.0.2 - Memory Graph Entities"""
 
 from dataclasses import dataclass, field
 from datetime import datetime

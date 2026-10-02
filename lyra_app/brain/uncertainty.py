@@ -1,12 +1,12 @@
 """
-Lyra 0.0.1 - Uncertainty Handler
+Lyra 0.0.2 - Uncertainty Handler
 
 Handles recognition and management of uncertain situations during decision making.
 """
 
 from typing import Optional, Dict, Any
-from context.context_state import ContextState
-from brain.decision import Decision
+from lyra_app.context.context_state import ContextState
+from lyra_app.brain.decision import Decision
 
 class UncertaintyHandler:
     """

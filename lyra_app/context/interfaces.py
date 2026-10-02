@@ -1,8 +1,8 @@
-"""Lyra 0.0.1 - Context Intelligence Layer Interfaces"""
+"""Lyra 0.0.2 - Context Intelligence Layer Interfaces"""
 
 from typing import List, Optional, Dict, Any
-from memory.entities import MemoryEntry
-from context.context_state import ContextState
+from lyra_app.memory.entities import MemoryEntry
+from lyra_app.context.context_state import ContextState
 
 class MemoryRetriever:
     """Abstract interface for memory retrieval systems.

@@ -1,15 +1,49 @@
 """
-Lyra 0.0.1 - Memory System
+Lyra 0.0.2 - Memory System
 Memory abstraction layer that belongs to AI Instance, not Brain.
 Prepared for local persistence as specified in REQUIREMENTS.md.
 """
 
+import re
+import unicodedata
 from typing import List, Optional
-from memory.entities import MemoryEntry, Revision
-from memory.memory_repository import MemoryRepository
-from memory.memory_graph import MemoryGraph
+
+from lyra_app.memory.entities import MemoryEntry, Revision
+from lyra_app.memory.memory_repository import MemoryRepository
+from lyra_app.memory.memory_graph import MemoryGraph
+from lyra_app.memory.graph_entities import MemoryRelation
 from datetime import datetime
 import uuid
+
+_WORD = re.compile(r"[^\W_]+", re.UNICODE)
+
+# Language-independent retrieval: fold PT and EN words onto one concept so a
+# Portuguese question can match a key written in English.
+_SYNONYMS: dict[str, set[str]] = {
+    "name": {"nome", "chamo", "chamas", "chamar", "name", "called"},
+    "birthday": {"aniversario", "birthday", "nascimento"},
+    "location": {"morada", "cidade", "vivo", "moro", "onde", "location", "live", "address", "city"},
+    "likes": {"gosto", "gosta", "adoro", "likes", "like", "love"},
+}
+_TOKEN_TO_CONCEPT = {token: concept for concept, tokens in _SYNONYMS.items() for token in tokens}
+
+
+def _fold(text: str) -> str:
+    decomposed = unicodedata.normalize("NFKD", text.lower())
+    return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+
+
+def _tokens(text: str) -> list[str]:
+    return _WORD.findall(_fold(text))
+
+
+def _expand(tokens: set[str]) -> set[str]:
+    expanded = set(tokens)
+    for token in tokens:
+        concept = _TOKEN_TO_CONCEPT.get(token)
+        if concept:
+            expanded |= _SYNONYMS[concept]
+    return expanded
 
 class MemorySystem:
     """Memory abstraction layer for AI instances.
@@ -21,6 +55,16 @@ class MemorySystem:
     def __init__(self, repository: MemoryRepository):
         self.repository = repository
         self.graph = MemoryGraph()  # Initialize graph infrastructure
+        self._rebuild_graph()
+
+    def _rebuild_graph(self) -> None:
+        """Rebuild the in-memory graph from the repository on load."""
+        try:
+            for entry in self.repository.query_memories(limit=100000):
+                self.graph.add_node(self._create_node_from_entry(entry))
+        except Exception:
+            # A broken graph must never prevent the companion from loading.
+            pass
         
     def add_memory(self, content: str, category: str = "general", 
                   importance: int = 0, source: str = "", 
@@ -54,6 +98,65 @@ class MemorySystem:
     def get_memories(self, category: Optional[str] = None, limit: int = 100) -> List[MemoryEntry]:
         """Retrieve memory entries, optionally filtered by category."""
         return self.repository.query_memories(category=category, limit=limit)
+
+    # -- key/value facts ------------------------------------------------
+
+    def remember_fact(self, key: str, value: str, importance: int = 8) -> str:
+        """Store a stable fact under a key, replacing any previous value."""
+        for entry in self.repository.query_memories(category="fact", limit=100000):
+            if entry.source == key:
+                self.repository.delete_memory(entry.id)
+        return self.add_memory(
+            content=value,
+            category="fact",
+            importance=importance,
+            source=key,
+            memory_type="fact",
+        )
+
+    def get_fact(self, key: str) -> Optional[MemoryEntry]:
+        """Return the fact stored under ``key``, if any."""
+        for entry in self.repository.query_memories(category="fact", limit=100000):
+            if entry.source == key:
+                return entry
+        return None
+
+    def forget(self, key: str) -> bool:
+        """Delete the fact stored under ``key``. Returns True if it existed."""
+        found = False
+        for entry in self.repository.query_memories(category="fact", limit=100000):
+            if entry.source == key:
+                self.repository.delete_memory(entry.id)
+                self.graph.nodes.pop(entry.id, None)
+                found = True
+        return found
+
+    def retrieve(self, query: str, limit: int = 3) -> List[MemoryEntry]:
+        """Rank memories by keyword overlap, importance and recency."""
+        query_tokens = _expand(set(_tokens(query)))
+        if not query_tokens:
+            return []
+        now = datetime.now()
+        scored: list[tuple[float, MemoryEntry]] = []
+        for entry in self.repository.query_memories(limit=100000):
+            entry_tokens = _expand(set(_tokens(entry.source) + _tokens(entry.content)))
+            overlap = len(query_tokens & entry_tokens)
+            if overlap == 0:
+                continue
+            recency = 1.0 / (1.0 + (now - entry.updated_at).total_seconds() / 86400.0)
+            score = overlap + (entry.importance / 10.0) + 0.3 * recency
+            scored.append((score, entry))
+        scored.sort(key=lambda item: item[0], reverse=True)
+        return [entry for _, entry in scored[:limit]]
+
+    # -- MemoryRetriever interface (used by the context layer) ----------
+
+    def retrieve_relevant_memories(self, query: str, category: Optional[str] = None,
+                                   limit: int = 10) -> List[MemoryEntry]:
+        return self.retrieve(query, limit=limit)
+
+    def search_with_context(self, context_state) -> List[MemoryEntry]:
+        return self.retrieve(getattr(context_state, "current_input", ""), limit=10)
         
     def get_memory_by_id(self, entry_id: str) -> Optional[MemoryEntry]:
         """Retrieve specific memory entry by ID."""
@@ -113,7 +216,7 @@ class MemorySystem:
     
     def _create_node_from_entry(self, entry: MemoryEntry) -> 'MemoryNode':
         """Create a memory node from a memory entry for graph."""
-        from memory.graph_entities import MemoryNode
+        from lyra_app.memory.graph_entities import MemoryNode
         return MemoryNode(
             memory_id=entry.id,
             timestamp=entry.timestamp,

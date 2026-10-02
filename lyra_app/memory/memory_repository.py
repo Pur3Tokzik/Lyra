@@ -1,8 +1,8 @@
-"""Lyra 0.0.1 - Memory Repository Interface"""
+"""Lyra 0.0.2 - Memory Repository Interface"""
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from memory.entities import MemoryEntry
+from lyra_app.memory.entities import MemoryEntry
 
 class MemoryRepository(ABC):
     """Abstract interface for memory storage."""
@@ -31,4 +31,9 @@ class MemoryRepository(ABC):
     @abstractmethod
     def clear_all_memories(self) -> bool:
         """Clear all memory entries."""
+        pass
+
+    @abstractmethod
+    def delete_memory(self, entry_id: str) -> bool:
+        """Delete a single memory entry by ID."""
         pass

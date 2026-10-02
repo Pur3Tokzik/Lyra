@@ -1,5 +1,5 @@
 """
-Lyra 0.0.1 - Journal Entities
+Lyra 0.0.2 - Journal Entities
 Data models for the journal system.
 """
 
@@ -47,8 +47,11 @@ class ImportantEvent:
 class JournalData:
     """Complete journal data structure."""
     
-    def __init__(self):
-        self.entries: List = []
-        self.important_events: List = []
-        self.session_context: Dict[str, Any] = {}
-        self.last_updated: Optional[datetime] = None
+    def __init__(self, entries: Optional[List] = None,
+                 important_events: Optional[List] = None,
+                 session_context: Optional[Dict[str, Any]] = None,
+                 last_updated: Optional[datetime] = None):
+        self.entries: List = entries if entries is not None else []
+        self.important_events: List = important_events if important_events is not None else []
+        self.session_context: Dict[str, Any] = session_context if session_context is not None else {}
+        self.last_updated: Optional[datetime] = last_updated

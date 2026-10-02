@@ -1,5 +1,5 @@
 """
-Lyra 0.0.1 - Core Domain Package
+Lyra 0.0.2 - Core Domain Package
 """
 
 # Main domain objects for Lyra AI system  

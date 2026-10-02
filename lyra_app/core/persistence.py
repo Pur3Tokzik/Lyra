@@ -1,84 +1,98 @@
+"""Atomic, UTF-8 persistence for the portable instance folder.
+
+Layout::
+
+    lyra_home/
+      identity/identity.json
+      personality/personality.json
+      settings/settings.json
+      memory/memories.json
+      journal/journal.json
+
+Copying this folder to another computer restores the companion. Every file
+carries a ``format_version`` and is written atomically (temp file + rename) so a
+crash mid-write cannot corrupt memory. ``encoding="utf-8"`` is explicit because
+the Windows default (cp1252) would corrupt Portuguese accents.
 """
-Lyra 0.0.1 - Persistence Layer
-Handles storage and retrieval of AI instance data according to Lyra's architecture.
-"""
+
+from __future__ import annotations
 
 import json
 import os
+import tempfile
 from pathlib import Path
-from typing import Optional
-from .ai_instance import AIInstance
+from typing import Any
 
-class PersistenceManager:
-    """Manages persistent storage of Lyra AI instances."""
-    
-    def __init__(self, data_dir: str = "data"):
-        self.data_dir = Path(data_dir)
-        self.data_dir.mkdir(exist_ok=True)
-        
-    def save_ai_instance(self, ai_instance: AIInstance, filename: str = "current_ai.json") -> bool:
-        """Save AI instance to persistent storage."""
-        try:
-            file_path = self.data_dir / filename
-            data = {
-                "ai_name": ai_instance.ai_name,
-                "identity": {
-                    "created": ai_instance.identity.created,
-                    "user_identity_preference": ai_instance.identity.user_identity_preference
-                },
-                "personality": {
-                    "selected_type": ai_instance.personality.selected_type,
-                    "custom_description": ai_instance.personality.custom_description
-                },
-                "model_configuration": getattr(ai_instance, 'model_configuration', None),
-                "memory": getattr(ai_instance, 'memory', {}),
-                "creation_timestamp": ai_instance.creation_timestamp.isoformat()
-            }
-            
-            with open(file_path, 'w') as f:
-                json.dump(data, f, indent=2)
-                
-            return True
-            
-        except Exception as e:
-            print(f"Error saving AI instance: {e}")
-            return False
-            
-    def load_ai_instance(self, filename: str = "current_ai.json") -> Optional[AIInstance]:
-        """Load AI instance from persistent storage."""
-        try:
-            file_path = self.data_dir / filename
-            if not file_path.exists():
-                return None
-                
-            with open(file_path, 'r') as f:
-                data = json.load(f)
-                
-            ai_instance = AIInstance(ai_name=data.get("ai_name", "AI"))
-            ai_instance.identity.created = data.get("identity", {}).get("created", False)
-            ai_instance.identity.user_identity_preference = data.get("identity", {}).get("user_identity_preference")
-            
-            ai_instance.personality.selected_type = data.get("personality", {}).get("selected_type")
-            ai_instance.personality.custom_description = data.get("personality", {}).get("custom_description")
-            
-            # Set model configuration and memory as attributes if they exist
-            model_config = data.get("model_configuration")
-            if model_config is not None:
-                ai_instance.model_configuration = model_config
-                
-            memory_data = data.get("memory", {})
-            if memory_data:
-                ai_instance.memory = memory_data
-            
-            # Note: creation_timestamp is loaded as string and would need parsing if needed
-            timestamp_str = data.get("creation_timestamp")
-            if timestamp_str:
-                ai_instance.creation_timestamp = datetime.fromisoformat(timestamp_str)
-            else:
-                ai_instance.creation_timestamp = datetime.now()  # fallback
-            
-            return ai_instance
-            
-        except Exception as e:
-            print(f"Error loading AI instance: {e}")
-            return None
+from lyra_app.core.instance import InstanceData
+
+FORMAT_VERSION = 1
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    with open(path, "r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def write_json_atomic(path: Path, data: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"format_version": FORMAT_VERSION, **data}
+    fd, tmp_name = tempfile.mkstemp(dir=str(path.parent), suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_name, path)
+    finally:
+        if os.path.exists(tmp_name):
+            os.remove(tmp_name)
+
+
+class InstanceStore:
+    """Reads and writes the portable instance folder."""
+
+    def __init__(self, home: Path | str):
+        self.home = Path(home).expanduser()
+
+    @property
+    def identity_file(self) -> Path:
+        return self.home / "identity" / "identity.json"
+
+    @property
+    def personality_file(self) -> Path:
+        return self.home / "personality" / "personality.json"
+
+    @property
+    def settings_file(self) -> Path:
+        return self.home / "settings" / "settings.json"
+
+    @property
+    def memory_file(self) -> Path:
+        return self.home / "memory" / "memories.json"
+
+    @property
+    def journal_file(self) -> Path:
+        return self.home / "journal" / "journal.json"
+
+    def exists(self) -> bool:
+        return self.identity_file.exists()
+
+    def save(self, instance: InstanceData) -> None:
+        write_json_atomic(self.identity_file, {"identity": instance.identity.__dict__})
+        write_json_atomic(
+            self.personality_file, {"personality": instance.personality.__dict__}
+        )
+        write_json_atomic(self.settings_file, {"settings": instance.settings.__dict__})
+
+    def save_settings(self, settings) -> None:
+        write_json_atomic(self.settings_file, {"settings": settings.__dict__})
+
+    def load(self) -> InstanceData:
+        identity = read_json(self.identity_file).get("identity", {})
+        personality = read_json(self.personality_file).get("personality", {})
+        settings = read_json(self.settings_file).get("settings", {})
+        return InstanceData.from_dict(
+            {"identity": identity, "personality": personality, "settings": settings}
+        )

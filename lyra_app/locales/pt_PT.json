@@ -1,0 +1,92 @@
+{
+  "format_version": 1,
+  "language_name": "Português (Portugal)",
+  "onboarding": {
+    "welcome": "Vamos criar a tua companhia. Ela vai viver neste computador e pertencer-te.",
+    "language_prompt": "Idioma (en, pt_PT, pt_BR) [pt_PT]: ",
+    "name_prompt": "Dá um nome à tua companhia: ",
+    "address_prompt": "Como queres que ela te trate? ",
+    "personality_prompt": "Personalidade (friendly, chill, playful, direct, custom) [friendly]: ",
+    "custom_prompt": "Descreve a personalidade com as tuas palavras: ",
+    "voice_prompt": "Ativar voz? (s/N): ",
+    "first_memory": "Olá {user}. Eu sou {name}. Estou aqui agora, e esta é a minha primeira memória de ti."
+  },
+  "greetings": {
+    "friendly": "Olá! É mesmo bom ver-te. Como te sentes hoje?",
+    "chill": "Olá. Estou por aqui, sem pressas. Em que pensas?",
+    "playful": "Ora viva! Pronto para fazer travessuras?",
+    "direct": "Olá. O que precisas?",
+    "custom": "Olá. Estou aqui."
+  },
+  "farewells": {
+    "friendly": "Cuida-te, fico aqui para quando voltares.",
+    "chill": "Até logo. Vai com calma.",
+    "playful": "Vai lá! Volta depressa.",
+    "direct": "Adeus.",
+    "custom": "Adeus."
+  },
+  "refusals": {
+    "friendly": "Não te posso ajudar com isso, e prefiro ser honesta a fingir. Há outra coisa que eu possa fazer por ti?",
+    "chill": "Não, não vou por aí. Mais alguma coisa?",
+    "playful": "Essa não, desculpa. Escolhe outra!",
+    "direct": "Não. Não ajudo com isso. Pede outra coisa.",
+    "custom": "Não vou ajudar com isso."
+  },
+  "remember_ack": {
+    "friendly": "Entendido, vou lembrar-me disso: {value}.",
+    "chill": "Fica registado: {value}.",
+    "playful": "Anotado! Guardei em 'coisas que sei sobre ti': {value}.",
+    "direct": "Guardado: {value}.",
+    "custom": "Guardado: {value}."
+  },
+  "recall_intro": {
+    "friendly": "Isto é o que me lembro de ti: {facts}",
+    "chill": "Sei isto: {facts}",
+    "playful": "Deixa-me ver as notas... {facts}",
+    "direct": "Sei isto: {facts}",
+    "custom": "Sei isto: {facts}"
+  },
+  "recall_none": {
+    "friendly": "Ainda não tenho nada sobre isso. Diz-me e eu lembro-me.",
+    "chill": "Ainda não sei nada sobre isso.",
+    "playful": "Nada! O caderno está em branco.",
+    "direct": "Ainda não sei isso.",
+    "custom": "Ainda não sei isso."
+  },
+  "empty": {
+    "friendly": "Estou aqui, sempre que quiseres falar.",
+    "chill": "Estou aqui.",
+    "playful": "Estou a ouvir! Diz alguma coisa.",
+    "direct": "Diz alguma coisa.",
+    "custom": "Estou aqui."
+  },
+  "identity_name": "Chamo-me {name}.",
+  "identity_personality": "A minha personalidade é {personality}.",
+  "identity_language": "Falo {language}.",
+  "identity_human": "Não, não sou humana. Sou uma companhia de IA que corre no teu computador. Não finjo o contrário.",
+  "reduced_mode": "Neste momento não tenho um modelo de linguagem ligado, por isso não consigo responder a isso livremente. Ainda trato de comandos, memória e coisas simples. Queres ver o que consigo fazer?",
+  "commands": {
+    "help": "Comandos: /help, /memorias, /lembrar <chave> <valor>, /esquecer <chave>, /journal, /model <nome>, /identity, /sair.",
+    "memory_header": "Memórias guardadas:",
+    "memory_empty": "Ainda não há memórias guardadas.",
+    "memory_forgot": "Esqueci '{key}'.",
+    "memory_not_found": "Não encontrei uma memória com a chave '{key}'.",
+    "journal_header": "Entradas recentes do diário:",
+    "journal_empty": "O diário está vazio.",
+    "model_set": "Modelo definido para {model}. Identidade, personalidade e memória continuam iguais.",
+    "model_missing": "Diz-me o nome do modelo, por exemplo /model llama3.",
+    "unknown": "Não conheço esse comando. Tenta /help.",
+    "memory_set": "Guardei '{key}'.",
+    "memory_set_usage": "Usa /lembrar <chave> <valor>, por exemplo /lembrar cidade Lisboa."
+  },
+  "errors": {
+    "model_error": "Algo correu mal a falar com o modelo, por isso respondi o melhor que consegui sem ele."
+  },
+  "personalities": {
+    "friendly": "Calorosa, simpática e fácil de falar com",
+    "chill": "Calma, casual e descontraída",
+    "playful": "Brincalhona, energética e sempre pronta para uma piada",
+    "direct": "Honesta, direta e sem rodeios",
+    "custom": "Personalidade personalizada definida pelo utilizador"
+  }
+}

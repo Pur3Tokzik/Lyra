@@ -1,73 +1,71 @@
 # Lyra
-> **Lyra 0.0.1 is focused on building the architectural foundation required for truly personalized local AI companions.**
 
----
+> Local-first AI companion system. The brain decides; the language model is only
+> a function, called when free text is genuinely needed.
 
-# Vision
+Lyra is the system, not the AI. The companion you create has the name you choose,
+lives in a folder on your computer, and can be copied to another machine like a
+save game.
 
-Create a fully local AI framework where users can create, own and maintain their own AI instance.
+## Status: 0.0.2
 
-The language model is a capability.
+0.0.2 makes the project actually run and converse, following the alignment plan
+(phases A to F):
 
-The identity belongs to the AI instance itself.
+- Starts on Windows, Linux and macOS with `python -m lyra_app`.
+- Portable instance folder with identity, personality, memory, journal and
+  settings, written atomically in UTF-8.
+- Real onboarding in English, Português (Portugal) and Português (Brasil).
+- Brain that decides with rules and memory. Commands, greetings, identity
+  questions and factual memory work with no model connected.
+- Guideline layer enforced by the system, above model, personality and user.
+- Honest reduced mode when no model is available.
+- One model abstraction (Ollama over `urllib`), used only when the decision is
+  to generate free text.
 
-Lyra is designed around a modular architecture where every capability can evolve independently while preserving compatibility with the rest of the system.
+## Requirements
 
----
+- Python 3.10 or newer.
+- The core uses only the standard library. No `pip install` is needed to start.
+- Ollama is optional. Without it, Lyra runs in reduced mode.
 
-# Current Status
+## Run
 
-Lyra **0.0.1** is currently under active development.
+```bash
+python -m lyra_app                 # interactive, onboards if needed
+python -m lyra_app --say "olá"     # one turn and exit
+python -m lyra_app --model llama3  # choose the Ollama model
+python -m lyra_app --home ./me     # choose the instance folder
+python -m lyra_app --version
+```
 
-The project is being built incrementally through isolated architectural phases, ensuring stability, modularity and backward compatibility.
+The instance folder defaults to `~/.lyra` and can be overridden with `--home` or
+the `LYRA_HOME` environment variable.
 
----
+## Commands
 
-# Implemented
+```
+/help, /memories, /remember <key> <value>, /forget <key>,
+/journal, /model <name>, /identity, /quit
+```
 
-## Core Architecture
+## Tests
 
-* AI instance architecture
-* Dependency Injection based design
-* Identity system
-* Personality system
-* Onboarding architecture
-* AI interaction lifecycle
+```bash
+python -m pytest
+```
 
-## Memory & History
+## Layout
 
-* Memory subsystem
-* Memory repository abstraction
-* File-based memory persistence
-* Memory metadata foundation
-* Memory graph foundation
-* Journal system foundation
-* Conversation history structures
-* Event history structures
-
-## Model Integration
-
-* Abstract model interface
-* Model provider architecture
-* Local Ollama integration
-* Local LLM communication support
-
-## Context Intelligence
-
-* Context state architecture
-* Context builder foundation
-* Context manager
-* Context interfaces
-* Memory-aware context preparation
-
-## Persistence
-
-* AI state persistence
-* Memory persistence
-* Journal persistence
-
----
-
-# Architecture Roadmap
-
-Lyra is developed through incremental architectural layers.
+```
+lyra_app/
+  brain/       decision, intent (PT/EN rules), executor, pipeline
+  guideline/   system limits on input and output
+  context/     context state, builder and manager
+  memory/      facts, retrieval, repository, graph
+  journal/     conversation and event history
+  model/       one abstraction, Ollama and no-model backends
+  core/        instance data, persistence, onboarding, factory
+  interface/   i18n and CLI
+  locales/     en, pt_PT, pt_BR
+```

@@ -1,7 +1,7 @@
-"""Lyra 0.0.1 - Memory Graph Infrastructure"""
+"""Lyra 0.0.2 - Memory Graph Infrastructure"""
 
 from typing import Dict, List, Optional
-from memory.graph_entities import MemoryNode, MemoryRelation
+from lyra_app.memory.graph_entities import MemoryNode, MemoryRelation
 
 class MemoryGraph:
     """Base infrastructure for managing memory relationships."""

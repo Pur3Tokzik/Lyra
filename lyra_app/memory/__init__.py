@@ -1,3 +1,3 @@
-"""Lyra 0.0.1 - Memory System"""
+"""Lyra 0.0.2 - Memory System"""
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"

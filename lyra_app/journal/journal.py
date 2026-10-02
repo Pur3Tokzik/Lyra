@@ -1,5 +1,5 @@
 """
-Lyra 0.0.1 - Journal System Core
+Lyra 0.0.2 - Journal System Core
 Central component for tracking conversations and experiences.
 """
 

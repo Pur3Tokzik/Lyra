@@ -1,4 +1,4 @@
-"""Lyra 0.0.1 - Model Entities"""
+"""Lyra 0.0.2 - Model Entities"""
 
 from dataclasses import dataclass, field
 from typing import Dict, Any

@@ -1,124 +1,112 @@
-"""
-Lyra 0.0.1 - Ollama Model Provider
-Concrete implementation of ModelInterface for communication with local Ollama models.
+"""Ollama backend using only the standard library.
+
+Uses ``urllib.request`` (no ``requests``) and the ``/api/chat`` endpoint, which
+takes a proper message list. Timeout is configurable and a failure is raised as
+:class:`ModelUnavailable` so the brain can fall back to reduced mode instead of
+crashing.
 """
 
-import requests
+from __future__ import annotations
+
 import json
-from typing import Dict, Any, Optional
-from model.model_interface import ModelInterface
-from model.entities import ModelResponse
+import urllib.error
+import urllib.request
+from typing import Any, Dict, List, Optional
+
+from lyra_app.model.entities import ModelResponse
+from lyra_app.model.model_interface import ModelInterface, ModelUnavailable
+
 
 class OllamaModelProvider(ModelInterface):
-    """Concrete implementation of ModelInterface that communicates with Ollama backend."""
-    
-    def __init__(self, model_name: str = "llama3", base_url: str = "http://localhost:11434"):
-        """
-        Initialize the Ollama model provider.
-        
-        Args:
-            model_name: Name of the Ollama model to use (default: llama3)
-            base_url: Base URL for Ollama API (default: http://localhost:11434)
-        """
-        self.model_name = model_name
-        self.base_url = base_url
-        self._available = False
-        self._health_check()
-    
-    def _health_check(self) -> None:
-        """Check if Ollama backend is available."""
-        try:
-            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
-            self._available = response.status_code == 200
-        except:
-            self._available = False
-    
-    def process_message(self, message: str, context: Optional[Dict[str, Any]] = None) -> ModelResponse:
-        """
-        Send a message to the Ollama model and receive a response.
-        
-        Args:
-            message: The input message to send to the model
-            context: Additional context for processing (optional)
-            
-        Returns:
-            ModelResponse containing the response and metadata
-        """
-        if not self._available:
-            raise RuntimeError("Ollama backend is not available")
-        
-        # Prepare request payload  
-        payload = {
-            "model": self.model_name,
-            "prompt": message,
-            "stream": False
-        }
-        
-        # Add context if provided (can be extended as needed)
-        if context:
-            payload["context"] = context
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/api/generate",
-                json=payload,
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                return ModelResponse(
-                    content=result.get("response", ""),
-                    metadata={
-                        "model": self.model_name,
-                        "status": "success",
-                        "prompt_tokens": result.get("prompt_eval_count", 0),
-                        "completion_tokens": result.get("eval_count", 0)
-                    }
-                )
-            else:
-                raise RuntimeError(f"Ollama API error: {response.status_code} - {response.text}")
-                
-        except requests.exceptions.RequestException as e:
-            raise RuntimeError(f"Network error communicating with Ollama: {str(e)}")
-    
-    def configure_model(self, model_name: str, parameters: Dict[str, Any]) -> bool:
-        """
-        Configure the model settings.
-        
-        Args:
-            model_name: Name of the model to use
-            parameters: Configuration parameters
-            
-        Returns:
-            True if configuration was successful
-        """
-        self.model_name = model_name
-        # In a real implementation, this might update model parameters
-        return True
-    
-    def get_model_info(self) -> Dict[str, Any]:
-        """
-        Get information about the current model.
-        
-        Returns:
-            Dictionary with model information
-        """
-        return {
-            "model_name": self.model_name,
-            "backend": "Ollama",
-            "available": self._available,
-            "base_url": self.base_url
-        }
-    
-    def is_model_available(self) -> bool:
-        """
-        Check if the model backend is available.
-        
-        Returns:
-            True if model backend is ready for use
-        """
-        return self._available
+    """Talks to a local Ollama server over HTTP."""
 
-# For backward compatibility and clear naming
-OllamaModelInterface = OllamaModelProvider
+    def __init__(
+        self,
+        model_name: str = "llama3",
+        base_url: str = "http://localhost:11434",
+        timeout: float = 60.0,
+    ):
+        self.model_name = model_name
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+        self._available: Optional[bool] = None
+
+    @property
+    def name(self) -> str:  # type: ignore[override]
+        return self.model_name
+
+    def _request(self, path: str, payload: Optional[dict] = None, timeout: float | None = None):
+        url = f"{self.base_url}{path}"
+        data = json.dumps(payload).encode("utf-8") if payload is not None else None
+        request = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST" if data is not None else "GET",
+        )
+        with urllib.request.urlopen(request, timeout=timeout or self.timeout) as response:
+            return json.loads(response.read().decode("utf-8"))
+
+    def is_available(self) -> bool:
+        try:
+            self._request("/api/tags", timeout=3.0)
+            self._available = True
+        except (urllib.error.URLError, OSError, ValueError):
+            self._available = False
+        return bool(self._available)
+
+    def generate(
+        self,
+        system_prompt: str,
+        user_message: str,
+        history: Optional[List[Dict[str, str]]] = None,
+        timeout: float = 60.0,
+    ) -> ModelResponse:
+        messages: List[Dict[str, str]] = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        for turn in history or []:
+            role = turn.get("role", "user")
+            content = turn.get("content", "")
+            if content:
+                messages.append({"role": role, "content": content})
+        messages.append({"role": "user", "content": user_message})
+
+        payload = {"model": self.model_name, "messages": messages, "stream": False}
+        try:
+            result = self._request("/api/chat", payload=payload, timeout=timeout)
+        except (urllib.error.URLError, OSError, ValueError) as error:
+            self._available = False
+            raise ModelUnavailable(str(error)) from error
+
+        content = ""
+        message = result.get("message")
+        if isinstance(message, dict):
+            content = message.get("content", "")
+        elif isinstance(result.get("response"), str):
+            content = result["response"]
+
+        return ModelResponse(
+            content=content,
+            metadata={
+                "model": self.model_name,
+                "status": "success",
+                "prompt_tokens": result.get("prompt_eval_count", 0),
+                "completion_tokens": result.get("eval_count", 0),
+            },
+        )
+
+    def configure(self, model_name: str) -> bool:
+        if not model_name:
+            return False
+        self.model_name = model_name
+        self._available = None
+        return True
+
+    def get_model_info(self) -> Dict[str, Any]:
+        return {
+            "name": self.model_name,
+            "backend": "ollama",
+            "available": self.is_available(),
+            "base_url": self.base_url,
+        }

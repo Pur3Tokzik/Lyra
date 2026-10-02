@@ -1,10 +1,10 @@
-"""Lyra 0.0.1 - Context Builder Implementation"""
+"""Lyra 0.0.2 - Context Builder Implementation"""
 
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from context.context_state import ContextState
-from context.interfaces import MemoryRetriever, ContextBuilder
-from memory.entities import MemoryEntry
+from lyra_app.context.context_state import ContextState
+from lyra_app.context.interfaces import MemoryRetriever, ContextBuilder
+from lyra_app.memory.entities import MemoryEntry
 
 class BasicContextBuilder(ContextBuilder):
     """Basic implementation of context builder.

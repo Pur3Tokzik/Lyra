@@ -1,43 +1,42 @@
-"""Lyra 0.0.1 - Context Manager Implementation"""
+"""Context manager: builds a ContextState for each turn.
 
-from typing import List, Optional, Dict, Any
-from context.context_state import ContextState
-from context.interfaces import ContextBuilder, ContextManager as ContextManagerInterface
+The manager owns a builder. For convenience it can be constructed directly from
+a memory system, which is the call the previous version got wrong (it passed a
+``memory_system`` argument that did not exist).
+"""
+
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
+
+from lyra_app.context.context_builder import BasicContextBuilder
+from lyra_app.context.context_state import ContextState
+from lyra_app.context.interfaces import ContextBuilder, ContextManager as ContextManagerInterface
+
 
 class BasicContextManager(ContextManagerInterface):
-    """Basic implementation of context manager.
-    
-    This class handles the lifecycle of context creation and management,
-    using a provided context builder to assemble context states.
-    """
-    
-    def __init__(self, context_builder: ContextBuilder):
-        """
-        Initialize context manager with a builder.
-        
-        Args:
-            context_builder: Builder to use for creating contexts
-        """
-        super().__init__(context_builder)
-        self.context_builder = context_builder
-        
-    def create_context(self, 
-                      conversation_id: str,
-                      current_input: str,
-                      recent_messages: List[Dict[str, Any]] = None) -> ContextState:
-        """
-        Create a new context state.
-        
-        Args:
-            conversation_id: Unique conversation identifier
-            current_input: Current user input text
-            recent_messages: Recent conversation history
-            
-        Returns:
-            New ContextState object with all components assembled
-        """
+    """Lifecycle wrapper around a context builder."""
+
+    def __init__(
+        self,
+        context_builder: Optional[ContextBuilder] = None,
+        memory_system: Any = None,
+    ):
+        builder = context_builder or BasicContextBuilder(memory_retriever=memory_system)
+        super().__init__(builder)
+        self.context_builder = builder
+
+    def create_context(
+        self,
+        conversation_id: str,
+        current_input: str,
+        recent_messages: List[Dict[str, Any]] = None,
+        memory_system: Any = None,
+    ) -> ContextState:
+        if memory_system is not None and getattr(self.context_builder, "memory_retriever", None) is None:
+            self.context_builder.memory_retriever = memory_system
         return self.context_builder.build_context(
             conversation_id=conversation_id,
             current_input=current_input,
-            recent_messages=recent_messages
+            recent_messages=recent_messages,
         )

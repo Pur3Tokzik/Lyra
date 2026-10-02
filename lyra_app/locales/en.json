@@ -1,0 +1,92 @@
+{
+  "format_version": 1,
+  "language_name": "English",
+  "onboarding": {
+    "welcome": "Let's create your companion. It will live on this computer and belong to you.",
+    "language_prompt": "Language (en, pt_PT, pt_BR) [en]: ",
+    "name_prompt": "Give your companion a name: ",
+    "address_prompt": "What should it call you? ",
+    "personality_prompt": "Personality (friendly, chill, playful, direct, custom) [friendly]: ",
+    "custom_prompt": "Describe the personality in your own words: ",
+    "voice_prompt": "Enable voice? (y/N): ",
+    "first_memory": "Hi {user}. I'm {name}. I'm here now, and this is my first memory of you."
+  },
+  "greetings": {
+    "friendly": "Hi! It's really good to see you. How are you feeling today?",
+    "chill": "Hey. I'm around, no rush. What's up?",
+    "playful": "Well hello there! Ready to stir up some trouble?",
+    "direct": "Hello. What do you need?",
+    "custom": "Hello. I'm here."
+  },
+  "farewells": {
+    "friendly": "Take care, I'll be here when you come back.",
+    "chill": "See you. Take it easy.",
+    "playful": "Off you go! Come back soon.",
+    "direct": "Goodbye.",
+    "custom": "Goodbye."
+  },
+  "refusals": {
+    "friendly": "I can't help with that, and I'd rather be honest than pretend. Is there something else I can do for you?",
+    "chill": "Nah, I'm not going there. Anything else?",
+    "playful": "Not that one, sorry. Pick something else!",
+    "direct": "No. I won't help with that. Ask me something else.",
+    "custom": "I won't help with that."
+  },
+  "remember_ack": {
+    "friendly": "Got it, I'll remember that: {value}.",
+    "chill": "Noted: {value}.",
+    "playful": "Got it! Filed under 'things I know about you': {value}.",
+    "direct": "Saved: {value}.",
+    "custom": "Saved: {value}."
+  },
+  "recall_intro": {
+    "friendly": "Here's what I remember about you: {facts}",
+    "chill": "I know: {facts}",
+    "playful": "Let me check my notes... {facts}",
+    "direct": "I know: {facts}",
+    "custom": "I know: {facts}"
+  },
+  "recall_none": {
+    "friendly": "I don't have anything about that yet. Tell me and I'll remember.",
+    "chill": "I've got nothing on that yet.",
+    "playful": "Blank! Nothing in the notebook yet.",
+    "direct": "I don't know that yet.",
+    "custom": "I don't know that yet."
+  },
+  "empty": {
+    "friendly": "I'm here, whenever you want to talk.",
+    "chill": "I'm here.",
+    "playful": "I'm listening! Say something.",
+    "direct": "Say something.",
+    "custom": "I'm here."
+  },
+  "identity_name": "My name is {name}.",
+  "identity_personality": "My personality is {personality}.",
+  "identity_language": "I speak {language}.",
+  "identity_human": "No, I'm not human. I'm an AI companion that runs on your computer. I won't pretend otherwise.",
+  "reduced_mode": "There's no language model connected right now, so I can't answer that freely. I still handle commands, memory and simple things. Want to see what I can do?",
+  "commands": {
+    "help": "Commands: /help, /memories, /remember <key> <value>, /forget <key>, /journal, /model <name>, /identity, /quit.",
+    "memory_header": "Saved memories:",
+    "memory_empty": "No memories saved yet.",
+    "memory_forgot": "Forgot '{key}'.",
+    "memory_not_found": "I didn't find a memory with the key '{key}'.",
+    "journal_header": "Recent journal entries:",
+    "journal_empty": "The journal is empty.",
+    "model_set": "Model set to {model}. Identity, personality and memory stay the same.",
+    "model_missing": "Tell me the model name, like /model llama3.",
+    "unknown": "I don't know that command. Try /help.",
+    "memory_set": "Saved '{key}'.",
+    "memory_set_usage": "Use /remember <key> <value>, for example /remember city Lisbon."
+  },
+  "errors": {
+    "model_error": "Something went wrong talking to the model, so I answered as best I could without it."
+  },
+  "personalities": {
+    "friendly": "Warm, friendly and easy to talk to",
+    "chill": "Calm, casual and relaxed",
+    "playful": "Playful, energetic and always ready for a joke",
+    "direct": "Honest, direct and straight to the point",
+    "custom": "Custom personality defined by the user"
+  }
+}

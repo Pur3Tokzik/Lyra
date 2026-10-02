@@ -1,8 +1,8 @@
-"""Lyra 0.0.1 - Memory API Interfaces"""
+"""Lyra 0.0.2 - Memory API Interfaces"""
 
 from typing import List, Optional
-from memory.entities import MemoryEntry
-from memory.graph_entities import MemoryRelation
+from lyra_app.memory.entities import MemoryEntry
+from lyra_app.memory.graph_entities import MemoryRelation
 
 class MemoryAPI:
     """Foundation interface for memory operations."""

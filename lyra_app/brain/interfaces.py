@@ -1,14 +1,14 @@
 """
-Lyra 0.0.1 - Brain Interfaces
+Lyra 0.0.2 - Brain Interfaces
 
 Contracts and interfaces for the cognitive decision engine components.
 Ensures loose coupling between modules while maintaining clear boundaries.
 """
 
 from typing import Optional, Dict, Any
-from context.context_state import ContextState
-from brain.decision import Decision
-from brain.execution_plan import ExecutionPlan
+from lyra_app.context.context_state import ContextState
+from lyra_app.brain.decision import Decision
+from lyra_app.brain.execution_plan import ExecutionPlan
 
 class DecisionEngineInterface:
     """

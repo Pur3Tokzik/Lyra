@@ -1,12 +1,12 @@
 """
-Lyra 0.0.1 - Execution Plan
+Lyra 0.0.2 - Execution Plan
 
 ExecutionPlan represents an ordered sequence of actions required to fulfill a Decision.
 It is a structured description without implementation logic.
 """
 
 from typing import List, Dict, Any, Optional
-from brain.decision import Decision
+from lyra_app.brain.decision import Decision
 
 class ExecutionStep:
     """

@@ -1,1 +1,1 @@
-"""Lyra 0.0.1 - Context Intelligence Layer"""
+"""Lyra 0.0.2 - Context Intelligence Layer"""

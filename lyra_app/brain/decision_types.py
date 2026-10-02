@@ -1,5 +1,5 @@
 """
-Lyra 0.0.1 - Decision Types
+Lyra 0.0.2 - Decision Types
 
 Enumeration of decision types supported by the cognitive decision engine.
 """

@@ -1,5 +1,5 @@
 """
-Lyra 0.0.1 - Decision Object
+Lyra 0.0.2 - Decision Object
 
 Immutable decision object that represents a cognitive choice made by the AI.
 
@@ -8,7 +8,7 @@ not actual implementation details or business logic.
 """
 
 from typing import Optional, Dict, Any
-from brain.decision_types import DecisionType
+from lyra_app.brain.decision_types import DecisionType
 
 class Decision:
     """

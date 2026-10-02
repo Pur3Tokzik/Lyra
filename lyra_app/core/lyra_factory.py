@@ -1,43 +1,53 @@
-"""
-Lyra 0.0.1 - Lyra Factory
-Factory for creating complete Lyra instances with proper dependency injection.
+"""Factory: build a ready-to-use companion.
+
+Resolves the instance folder, decides which model backend to use, and either
+loads the existing companion or runs onboarding for a new one.
 """
 
-from .ai_instance import AIInstance
-from ..memory.file_memory_repository import FileMemoryRepository
-from ..memory.memory_system import MemorySystem
-from ..model.model_provider import ModelProvider
+from __future__ import annotations
 
-class LyraFactory:
-    """Factory for creating complete Lyra AI instances with proper dependency injection."""
-    
-    @staticmethod
-    def create_lyra_instance(
-        ai_name: str = "AI",
-        memory_file_path: str = "memory.json",
-        model_provider: ModelProvider = None
-    ) -> AIInstance:
-        """Create a fully configured Lyra AI instance.
-        
-        Args:
-            ai_name: Name for the AI instance
-            memory_file_path: Path to the memory storage file
-            model_provider: Optional model provider (to be injected)
-            
-        Returns:
-            Configured AIInstance with all dependencies
-        """
-        # Create the memory repository
-        memory_repository = FileMemoryRepository(memory_file_path)
-        
-        # Create the memory system with the repository
-        memory_system = MemorySystem(memory_repository)
-        
-        # Create the AI instance with all dependencies
-        ai_instance = AIInstance(
-            ai_name=ai_name,
-            memory_system=memory_system,
-            model_interface=model_provider  # This is passed as model_interface to match AIInstance signature
-        )
-        
-        return ai_instance
+import os
+from pathlib import Path
+from typing import Callable, Optional
+
+from lyra_app.core import onboarding
+from lyra_app.core.ai_instance import AIInstance
+from lyra_app.core.persistence import InstanceStore
+from lyra_app.model.model_interface import ModelInterface, NoModel
+from lyra_app.model.ollama_model_provider import OllamaModelProvider
+
+DEFAULT_HOME = "~/.lyra"
+
+
+def default_home() -> Path:
+    return Path(os.environ.get("LYRA_HOME", DEFAULT_HOME)).expanduser()
+
+
+def build_model(model_name: Optional[str]) -> ModelInterface:
+    """Return an Ollama backend if a model is configured and reachable."""
+    if not model_name:
+        return NoModel()
+    provider = OllamaModelProvider(model_name=model_name)
+    return provider if provider.is_available() else NoModel()
+
+
+def load_or_create(
+    home: Optional[Path | str] = None,
+    model_name: Optional[str] = None,
+    input_fn: Callable[[str], str] = input,
+    output_fn: Callable[[str], None] = print,
+) -> AIInstance:
+    """Load the companion at ``home`` or onboard a new one interactively."""
+    target = Path(home).expanduser() if home else default_home()
+    store = InstanceStore(target)
+
+    if store.exists():
+        data = store.load()
+        chosen_model = model_name or data.settings.model_name
+        instance = AIInstance.open(target, model_interface=build_model(chosen_model))
+        return instance
+
+    model = build_model(model_name)
+    return onboarding.run_interactive(
+        target, input_fn=input_fn, output_fn=output_fn, model_interface=model
+    )

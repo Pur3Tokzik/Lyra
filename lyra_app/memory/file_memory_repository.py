@@ -1,14 +1,16 @@
 """
-Lyra 0.0.1 - File-based Memory Repository
+Lyra 0.0.2 - File-based Memory Repository
 Concrete implementation of MemoryRepository using local JSON file storage.
 """
 
 import json
 import os
+import tempfile
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
-from memory.memory_repository import MemoryRepository
-from memory.entities import MemoryEntry
+from lyra_app.memory.memory_repository import MemoryRepository
+from lyra_app.memory.entities import MemoryEntry
 
 class FileMemoryRepository(MemoryRepository):
     """File-based implementation of MemoryRepository using local JSON storage."""
@@ -69,24 +71,48 @@ class FileMemoryRepository(MemoryRepository):
             return True
         except Exception:
             return False
+
+    def delete_memory(self, entry_id: str) -> bool:
+        """Delete a single memory entry by ID."""
+        try:
+            entries = [e for e in self._load_entries() if e.id != entry_id]
+            self._save_entries(entries)
+            return True
+        except Exception:
+            return False
     
+    @staticmethod
+    def _parse_dt(value, fallback: datetime) -> datetime:
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            try:
+                return datetime.fromisoformat(value)
+            except ValueError:
+                return fallback
+        return fallback
+
     def _load_entries(self) -> List[MemoryEntry]:
         """Load memory entries from file."""
         if not self.file_path.exists():
             return []
-        
-        with open(self.file_path, 'r') as f:
+
+        with open(self.file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
+
+        # Support both a bare list and the versioned envelope.
+        if isinstance(data, dict):
+            data = data.get('memories', [])
+
         # Convert dict back to MemoryEntry objects
         entries = []
         for entry_data in data:
-            # Handle backwards compatibility - some fields may be missing
+            now = datetime.now()
             try:
                 entry = MemoryEntry(
                     id=entry_data.get('id', entry_data.get('uuid', '')),
                     content=entry_data['content'],
-                    timestamp=entry_data['timestamp'],
+                    timestamp=self._parse_dt(entry_data.get('timestamp'), now),
                     category=entry_data.get('category', 'general'),
                     importance=entry_data.get('importance', 0),
                     confidence=entry_data.get('confidence', 1.0),
@@ -94,18 +120,18 @@ class FileMemoryRepository(MemoryRepository):
                     emotional_weight=entry_data.get('emotional_weight', 0),
                     memory_type=entry_data.get('memory_type', 'general'),
                     lifecycle_status=entry_data.get('lifecycle_status', 'active'),
-                    created_at=entry_data.get('created_at', None),
-                    updated_at=entry_data.get('updated_at', None)
+                    created_at=self._parse_dt(entry_data.get('created_at'), now),
+                    updated_at=self._parse_dt(entry_data.get('updated_at'), now)
                 )
             except Exception:
                 # Fallback to basic MemoryEntry if something goes wrong
                 entry = MemoryEntry(
                     id=entry_data.get('id', entry_data.get('uuid', '')),
                     content=entry_data['content'],
-                    timestamp=entry_data['timestamp']
+                    timestamp=self._parse_dt(entry_data.get('timestamp'), datetime.now())
                 )
             entries.append(entry)
-        
+
         return entries
     
     def _save_entries(self, entries: List[MemoryEntry]) -> None:
@@ -138,6 +164,15 @@ class FileMemoryRepository(MemoryRepository):
                     } for rev in entry.revision_history
                 ]
             data.append(entry_dict)
-        
-        with open(self.file_path, 'w') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+
+        payload = {"format_version": 1, "memories": data}
+        fd, tmp_name = tempfile.mkstemp(dir=str(self.file_path.parent), suffix=".tmp")
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                json.dump(payload, f, indent=2, ensure_ascii=False)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_name, self.file_path)
+        finally:
+            if os.path.exists(tmp_name):
+                os.remove(tmp_name)
