@@ -1,0 +1,36 @@
+name: Windows app
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-exe:
+    name: Build Lyra.exe and the installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade pip pyinstaller
+      - name: Build the windowed executable
+        run: |
+          python packaging/windows/make_icon.py
+          python -m PyInstaller packaging/windows/lyra.spec --noconfirm --distpath dist --workpath build/pyinstaller
+      - name: The executable reports the version
+        run: |
+          if (-not (Test-Path dist/Lyra.exe)) { throw "dist/Lyra.exe missing" }
+          $out = & dist/Lyra.exe --version
+          Write-Host $out
+          if ($out -notmatch "Lyra 0\.0\.6") { throw "unexpected --version output" }
+      - name: Upload the app
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lyra-windows
+          path: dist/Lyra.exe
+          if-no-files-found: error

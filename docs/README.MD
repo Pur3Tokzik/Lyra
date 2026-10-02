@@ -6,6 +6,7 @@ This directory contains the architectural documentation for Lyra.
 
 - `../README.md` — what Lyra is and how to run it.
 - `INSTALL.md` — install, first run, uninstall.
+- `INSTALL_WINDOWS.md` — the Windows installer (`Lyra-Setup-*.exe`) and building it.
 - `CLOUD_MODELS.md` — cloud models for weak machines.
 - `AUTONOMY.md` — how the companion keeps evolving on its own.
 - `CAPABILITIES.md` — write, install and share a capability.

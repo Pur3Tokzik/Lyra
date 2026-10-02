@@ -221,5 +221,10 @@
     "current": "Chamo-me {name}. Muda com /nome <novo nome>.",
     "changed": "Passo a chamar-me {name}.",
     "too_long": "Esse nome é demasiado longo (máx. 40 caracteres)."
+  },
+  "preflight": {
+    "title": "A Lyra ainda não pode arrancar",
+    "intro": "Faltam coisas de que a Lyra precisa. Corrige-as e recarrega; o chat fica fechado até a base estar sólida.",
+    "retry": "Verificar de novo"
   }
 }

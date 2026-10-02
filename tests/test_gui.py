@@ -114,6 +114,51 @@ def test_state_reports_onboarding_before_creation(empty_server):
     assert json.loads(body).get("onboarding") is True
 
 
+def test_readiness_endpoint_is_honest(empty_server):
+    server, _ = empty_server
+    _, body = _get(server + "/api/readiness")
+    data = json.loads(body)
+    assert data["required_ok"] is True
+    assert data["blockers"] == []
+    # Ollama and cloud are advisory: their absence must never block.
+    assert {a["name"] for a in data["advisories"]} <= {"ollama", "cloud"}
+
+
+def test_chat_is_blocked_when_a_required_piece_is_missing(empty_server, monkeypatch):
+    """The app must refuse to open the chat on a broken base (REQ-011)."""
+    from lyra_app.core import doctor
+    from lyra_app.interface import gui
+
+    monkeypatch.setattr(gui.readiness, "required_findings",
+                        lambda home: gui.readiness.Findings([
+                            doctor.Check("python", False, "3.9", "install Python 3.10+"),
+                        ]))
+    server, _ = empty_server
+    with pytest.raises(urllib.error.HTTPError) as info:
+        _get(server + "/")
+    assert info.value.code == 503
+    body = info.value.read().decode("utf-8")
+    assert "install Python 3.10+" in body
+    assert "api/onboard" not in body
+
+
+def test_onboard_post_is_rejected_when_not_ready(empty_server, monkeypatch):
+    from lyra_app.core import doctor
+    from lyra_app.interface import gui
+
+    monkeypatch.setattr(gui.readiness, "required_findings",
+                        lambda home: gui.readiness.Findings([
+                            doctor.Check("instance", False, "not writable", "pick another folder"),
+                        ]))
+    server, _ = empty_server
+    with pytest.raises(urllib.error.HTTPError) as info:
+        _post(server + "/api/onboard", {
+            "language": "en", "name": "Aurora", "personality": "friendly",
+        })
+    assert info.value.code == 503
+    assert json.loads(info.value.read().decode("utf-8"))["error"] == "not_ready"
+
+
 def test_onboard_creates_and_switches_to_chat(empty_server):
     server, home = empty_server
     token = _page_token(server, "/onboarding")

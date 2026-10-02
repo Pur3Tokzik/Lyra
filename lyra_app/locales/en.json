@@ -221,5 +221,10 @@
     "current": "My name is {name}. Change it with /name <new name>.",
     "changed": "My name is now {name}.",
     "too_long": "That name is too long (40 characters max)."
+  },
+  "preflight": {
+    "title": "Lyra can't start yet",
+    "intro": "Some things Lyra needs are missing. Fix them and reload; the chat stays closed until the base is sound.",
+    "retry": "Check again"
   }
 }

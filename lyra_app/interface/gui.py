@@ -23,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from lyra_app.core import onboarding
+from lyra_app.core import onboarding, readiness
 from lyra_app.core.ai_instance import AIInstance
 from lyra_app.core.instance import PERSONALITIES, personality_label
 from lyra_app.core.persistence import InstanceStore
@@ -37,6 +37,7 @@ from lyra_app.interface.i18n import (
 _WEB = Path(__file__).with_name("web")
 _CHAT_TEMPLATE = _WEB / "index.html"
 _ONBOARD_TEMPLATE = _WEB / "onboard.html"
+_PREFLIGHT_TEMPLATE = _WEB / "preflight.html"
 _MAX_BODY = 64 * 1024
 _LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1", "[::1]"}
 
@@ -67,6 +68,31 @@ def _render_chat(instance: AIInstance, token: str = "") -> str:
             "__COMPACT__": translator.t("gui.compact"),
             "__EXPAND__": translator.t("gui.expand"),
             "__COMPACT_HINT__": translator.t("gui.compact_hint"),
+        },
+    )
+
+
+def _render_preflight(findings, token: str = "") -> str:
+    """The blocking page shown when a required piece is missing.
+
+    Names the problem and the fix; the chat is deliberately unreachable until
+    the base is sound (REQ-011, REQ-060).
+    """
+    translator = Translator("en")
+    items = "".join(
+        f"<li><strong>{check.name}</strong>: {check.detail}"
+        + (f"<br><span class='hint'>{check.hint}</span>" if check.hint else "")
+        + "</li>"
+        for check in findings.blockers
+    )
+    return _fill(
+        _PREFLIGHT_TEMPLATE.read_text(encoding="utf-8"),
+        {
+            "__TOKEN__": token,
+            "__TITLE__": translator.t("preflight.title"),
+            "__INTRO__": translator.t("preflight.intro"),
+            "__ITEMS__": items,
+            "__RETRY__": translator.t("preflight.retry"),
         },
     )
 
@@ -146,6 +172,23 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
         def log_message(self, *args):  # keep the console quiet
             pass
 
+        def _preflight(self) -> bool:
+            """Refuse every page while a required piece is missing.
+
+            Returns True when the request may continue. When it returns False a
+            preflight page has already been sent, naming exactly what is
+            missing and how to fix it, so the app never opens the chat on a
+            broken base (REQ-011, REQ-060).
+            """
+            findings = readiness.required_findings(target)
+            if findings.required_ok:
+                return True
+            self._send(
+                503, "text/html; charset=utf-8",
+                _render_preflight(findings, token).encode("utf-8"),
+            )
+            return False
+
         def _send(self, status: int, content_type: str, body: bytes) -> None:
             self.send_response(status)
             self.send_header("Content-Type", content_type)
@@ -207,6 +250,8 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
             if not self._host_ok():
                 self._json({"error": "forbidden_host"}, status=403)
                 return
+            if not self._preflight():
+                return
             path = urlparse(self.path).path
             if path in ("/", "/index.html"):
                 if self._current() is None:
@@ -236,6 +281,19 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
                     "language": current.data.identity.language,
                     "personality": personality_label(current.data.personality.kind()),
                     "avatar": avatar,
+                })
+            elif path == "/api/readiness":
+                report = readiness.readiness(target)
+                self._json({
+                    "required_ok": report.required_ok,
+                    "blockers": [
+                        {"name": c.name, "detail": c.detail, "hint": c.hint}
+                        for c in report.blockers
+                    ],
+                    "advisories": [
+                        {"name": c.name, "detail": c.detail, "hint": c.hint}
+                        for c in report.advisories
+                    ],
                 })
             elif path == "/api/models":
                 from lyra_app.core import hardware, model_catalog
@@ -279,6 +337,17 @@ def make_handler(instance: AIInstance | None, home: Path | str | None = None):
             path = urlparse(self.path).path
             if path not in ("/api/chat", "/api/onboard"):
                 self._send(404, "text/plain; charset=utf-8", b"not found")
+                return
+            findings = readiness.required_findings(target)
+            if not findings.required_ok:
+                self._json({
+                    "ok": False,
+                    "error": "not_ready",
+                    "blockers": [
+                        {"name": c.name, "detail": c.detail, "hint": c.hint}
+                        for c in findings.blockers
+                    ],
+                }, status=503)
                 return
             if not self._guard():
                 return

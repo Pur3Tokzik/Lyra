@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased — Windows installer and a readiness gate
+
+### Added
+
+- **Windows installer**: a self-contained `Lyra.exe` (PyInstaller onefile, no
+  Python needed to run) plus an Inno Setup installer that puts the app, the
+  documentation and an optional Ollama in place. `Lyra.exe` opens the local web
+  GUI in the browser; `Lyra.exe --doctor` prints the environment report. See
+  `docs/INSTALL_WINDOWS.md` and `packaging/windows/`.
+- **Readiness gate** (`core/readiness.py`): before the chat opens, Lyra checks
+  what it needs and tells the truth about it. A missing **required** piece (a
+  supported Python when running from source, or an unwritable instance folder)
+  blocks the app with a page that names the problem and the fix; a missing
+  **advisory** piece (Ollama not running, no cloud key) does not block — Lyra
+  runs in reduced mode and says so. `--doctor` now exits non-zero (2) only when a
+  required piece is missing, and `--gui --browser` opens the companion for you.
+
 ## 0.0.6 — languages that scale, a journal you own, a harder GUI
 
 ### Added

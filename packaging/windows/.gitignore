@@ -1,0 +1,5 @@
+# Files created by the Windows build; never commit them.
+dist/
+build/pyinstaller/
+packaging/windows/vendor/
+packaging/windows/lyra.ico

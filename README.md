@@ -98,7 +98,11 @@ Honest list of what 0.0.6 does not do yet:
 ./install.sh          # guided Linux install (venv + launcher + optional Ollama)
 ```
 
-See `docs/INSTALL.md` for the manual install, Windows/macOS notes and uninstall.
+**Windows:** download `Lyra-Setup-<version>.exe` and run it. It is self-contained
+(no Python needed), copies the documentation next to the app, and optionally
+installs Ollama. See `docs/INSTALL_WINDOWS.md`.
+
+See `docs/INSTALL.md` for the manual install, macOS notes and uninstall.
 
 ## Run
 
@@ -109,6 +113,7 @@ python -m lyra_app --model llama3  # choose the Ollama model
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud model (weak machines)
 python -m lyra_app --home ./me     # choose the instance folder
 python -m lyra_app --gui           # local web GUI; visual onboarding if new
+python -m lyra_app --gui --browser # local web GUI and open it in the browser
 python -m lyra_app --doctor        # analyse the environment and exit
 python -m lyra_app --version
 ```

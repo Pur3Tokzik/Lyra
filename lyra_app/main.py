@@ -17,6 +17,7 @@ import sys
 from typing import Optional
 
 from lyra_app import __version__
+from lyra_app.core import readiness
 from lyra_app.core.ai_instance import AIInstance
 from lyra_app.core.lyra_factory import build_model, default_home
 from lyra_app.core.persistence import InstanceStore
@@ -78,11 +79,26 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--say", help="process one message and exit")
     parser.add_argument("--new", action="store_true", help="force onboarding")
     parser.add_argument("--gui", action="store_true", help="serve the local web GUI")
+    parser.add_argument("--browser", action="store_true",
+                        help="with --gui, open the companion in the default browser")
     parser.add_argument("--port", type=int, default=8000, help="GUI port (default: 8000)")
     parser.add_argument("--doctor", action="store_true",
                         help="analyse the environment and exit")
     parser.add_argument("--version", action="store_true", help="print version and exit")
     return parser
+
+
+def _readiness_or_exit(target) -> Optional[int]:
+    """Return an exit code when a required piece of the base is missing."""
+    findings = readiness.required_findings(target)
+    if findings.required_ok:
+        return None
+    print("Lyra cannot start yet:", file=sys.stderr)
+    for check in findings.blockers:
+        print(f"  [xx] {check.name}: {check.detail}", file=sys.stderr)
+        if check.hint:
+            print(f"       -> {check.hint}", file=sys.stderr)
+    return 2
 
 
 def main(argv: Optional[list] = None) -> int:
@@ -94,9 +110,13 @@ def main(argv: Optional[list] = None) -> int:
     if args.doctor:
         return _run_doctor(args.home)
 
+    target = args.home or default_home()
+    blocked = _readiness_or_exit(target)
+    if blocked is not None:
+        return blocked
+
     if args.gui:
         # The GUI can start before the companion exists: it onboards visually.
-        target = args.home or default_home()
         instance = None
         if not args.new and InstanceStore(target).exists():
             try:
@@ -104,7 +124,7 @@ def main(argv: Optional[list] = None) -> int:
             except (ValueError, FileNotFoundError) as error:
                 print(f"Error: {error}", file=sys.stderr)
                 return 1
-        return _run_gui(instance, args.port, target)
+        return _run_gui(instance, args.port, target, open_browser=args.browser)
 
     try:
         instance = _load_instance(args)
@@ -128,15 +148,24 @@ def _run_doctor(home: Optional[str]) -> int:
         if not check.ok and check.hint:
             print(f"       -> {check.hint}")
     print(f"Recommended model: {report.recommended}")
-    # Advisory, never a failure: reduced mode is a valid way to run Lyra.
-    return 0
+    # Missing Ollama or a cloud key only means reduced mode; that is valid.
+    # A missing required piece is a real failure the caller must see.
+    findings = readiness.Findings(report.checks)
+    return 0 if findings.required_ok else 2
 
 
-def _run_gui(instance: Optional[AIInstance], port: int, home=None) -> int:
+def _run_gui(instance: Optional[AIInstance], port: int, home=None,
+             open_browser: bool = False) -> int:
     from lyra_app.interface.gui import serve
 
     httpd = serve(instance, port=port, home=home)
-    print(f"Lyra GUI on http://127.0.0.1:{port}  (Ctrl+C to stop)")
+    url = f"http://127.0.0.1:{port}"
+    print(f"Lyra GUI on {url}  (Ctrl+C to stop)")
+    if open_browser:
+        import threading
+        import webbrowser
+
+        threading.Timer(0.6, lambda: webbrowser.open(url)).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

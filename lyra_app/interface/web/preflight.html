@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --panel: rgba(20, 26, 42, 0.72);
+    --panel-border: rgba(120, 160, 255, 0.18);
+    --text: #e8ecf7;
+    --muted: #93a0c0;
+    --accent: #6ea8ff;
+    --accent-2: #9b7bff;
+    --warn: #ffcf8a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(90,130,255,0.18), transparent),
+      radial-gradient(900px 500px at 100% 110%, rgba(180,90,255,0.14), transparent),
+      var(--bg);
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 40px 20px;
+  }
+  main {
+    width: 100%; max-width: 620px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 22px; padding: 30px 30px 26px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .orb {
+    width: 64px; height: 64px; border-radius: 20px; margin-bottom: 16px;
+    background: linear-gradient(145deg, var(--warn), #ff9d6e);
+    box-shadow: 0 0 34px rgba(255,180,110,0.45);
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 6px; font-weight: 650; }
+  .intro { color: var(--muted); margin: 0 0 22px; line-height: 1.5; }
+  ul { list-style: none; padding: 0; margin: 0 0 22px; }
+  li {
+    background: rgba(12, 18, 32, 0.6); border: 1px solid var(--panel-border);
+    border-radius: 14px; padding: 13px 15px; margin-bottom: 10px; line-height: 1.45;
+  }
+  li strong { color: var(--warn); }
+  .hint { color: var(--muted); font-size: .8rem; }
+  button.retry {
+    width: 100%; padding: 14px; border: none; cursor: pointer;
+    border-radius: 14px; font-weight: 700; font-size: 1rem; color: #08101f;
+    background: linear-gradient(145deg, var(--accent), var(--accent-2));
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="orb"></div>
+  <h1>__TITLE__</h1>
+  <p class="intro">__INTRO__</p>
+  <ul>__ITEMS__</ul>
+  <button class="retry" onclick="location.reload()">__RETRY__</button>
+</main>
+</body>
+</html>

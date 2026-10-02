@@ -26,8 +26,11 @@ python -m lyra_app --home ./me --model llama3
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud (needs LYRA_CLOUD_API_KEY)
 python -m lyra_app --doctor        # environment check, no instance needed
 python -m lyra_app --gui           # local web GUI on :8000 (visual onboarding if new)
-python -m pytest -q                # tests live in tests/; 177 collected (176 pass, 1 skip)
+python -m lyra_app --gui --browser # same, and open it in the default browser
+python -m pytest -q                # tests live in tests/; 186 collected (185 pass, 1 skip)
 ./install.sh --help                # installer is syntax-checked in CI
+# Windows app + installer (see docs/INSTALL_WINDOWS.md):
+powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
 ```
 
 ## Conventions
@@ -100,6 +103,11 @@ memory.
 
 ## Gotchas
 
+- The readiness gate (`core/readiness.py`) splits checks into **required**
+  (supported Python, writable instance folder) and **advisory** (Ollama, cloud
+  key). Required failures block the CLI (exit 2) and the GUI (a preflight page,
+  503); advisory ones never block — the companion runs in reduced mode. Keep
+  that distinction: blocking on a missing model would break Rule 1.
 - Language is stored in `identity`, not in settings.
 - The locale layer discovers files dynamically and falls back `xx_YY -> xx ->
   en`. Never hard-code the language list; use `available_languages()` /
