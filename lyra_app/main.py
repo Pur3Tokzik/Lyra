@@ -79,6 +79,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--new", action="store_true", help="force onboarding")
     parser.add_argument("--gui", action="store_true", help="serve the local web GUI")
     parser.add_argument("--port", type=int, default=8000, help="GUI port (default: 8000)")
+    parser.add_argument("--doctor", action="store_true",
+                        help="analyse the environment and exit")
     parser.add_argument("--version", action="store_true", help="print version and exit")
     return parser
 
@@ -88,6 +90,9 @@ def main(argv: Optional[list] = None) -> int:
     if args.version:
         print(f"Lyra {__version__}")
         return 0
+
+    if args.doctor:
+        return _run_doctor(args.home)
 
     try:
         instance = _load_instance(args)
@@ -100,6 +105,20 @@ def main(argv: Optional[list] = None) -> int:
     if args.gui:
         return _run_gui(instance, args.port)
     return _run_interactive(instance)
+
+
+def _run_doctor(home: Optional[str]) -> int:
+    from lyra_app.core import doctor
+
+    report = doctor.analyse(home)
+    print(f"Lyra {__version__} — environment check (profile: {report.profile})")
+    for check in report.checks:
+        mark = "ok  " if check.ok else "MISS"
+        print(f"[{mark}] {check.name}: {check.detail}")
+        if not check.ok and check.hint:
+            print(f"       -> {check.hint}")
+    print(f"Recommended model: {report.recommended}")
+    return 0 if report.ok() else 1
 
 
 def _run_gui(instance: AIInstance, port: int) -> int:

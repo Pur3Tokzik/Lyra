@@ -31,6 +31,7 @@ class OnboardingInput:
     personality: str = DEFAULT_PERSONALITY
     custom_description: str = ""
     voice: bool = False
+    model_name: str = ""
 
 
 def validate(data: OnboardingInput) -> list[str]:
@@ -76,7 +77,7 @@ def run(
         selected_type=data.personality.lower(),
         custom_description=(data.custom_description.strip() or None),
     )
-    settings = Settings(voice=data.voice)
+    settings = Settings(voice=data.voice, model_name=(data.model_name.strip() or None))
 
     instance = AIInstance.create(
         home=home,
@@ -129,6 +130,13 @@ def run_interactive(
 
     voice = input_fn(translator.t("onboarding.voice_prompt")).strip().lower() in ("s", "sim", "y", "yes")
 
+    from lyra_app.core.lyra_factory import suggest_model
+
+    suggestion = suggest_model()
+    model_name = input_fn(translator.t("onboarding.model_prompt", model=suggestion)).strip()
+    if not model_name:
+        model_name = suggestion
+
     data = OnboardingInput(
         language=language,
         name=name.strip() or "AI",
@@ -136,6 +144,7 @@ def run_interactive(
         personality=personality,
         custom_description=custom_description,
         voice=voice,
+        model_name=model_name,
     )
     instance = run(home, data, model_interface=model_interface)
     output_fn(_first_memory_text(translator, instance.ai_name, data.user_address or "you"))

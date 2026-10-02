@@ -12,6 +12,7 @@ from typing import Optional
 
 from lyra_app.brain.brain import Brain
 from lyra_app.capabilities.factory import build_default_manager
+from lyra_app.core.autonomy import AutonomyStore
 from lyra_app.core.instance import InstanceData
 from lyra_app.core.internal_state import InternalStateStore
 from lyra_app.core.objectives import ObjectiveStore, Objectives
@@ -115,15 +116,16 @@ class AIInstance:
         translator = Translator(data.identity.language)
         model = model_interface or NoModel()
 
-        # If no explicit model was supplied but one is configured, try Ollama.
+        # If no explicit model was supplied but one is configured, build it.
         if isinstance(model, NoModel) and data.settings.model_name:
-            from lyra_app.model.ollama_model_provider import OllamaModelProvider
+            from lyra_app.core.lyra_factory import build_model
 
-            model = OllamaModelProvider(model_name=data.settings.model_name)
+            model = build_model(data.settings.model_name)
 
         capabilities = build_default_manager(store.home, locale=data.identity.language)
         state_store = InternalStateStore(store.home)
         objectives = Objectives(ObjectiveStore(store.home))
+        autonomy_store = AutonomyStore(store.home)
         brain = Brain(
             memory_system=memory,
             model_interface=model,
@@ -134,6 +136,7 @@ class AIInstance:
             capability_manager=capabilities,
             state_store=state_store,
             objectives=objectives,
+            autonomy_store=autonomy_store,
         )
         return cls(
             data, store, memory, journal, model, translator, brain,

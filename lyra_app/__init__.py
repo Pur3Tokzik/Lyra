@@ -5,4 +5,4 @@ they choose. The brain decides everything with rules, context and memory; the
 language model is only a function called when free text is genuinely needed.
 """
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"

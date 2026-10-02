@@ -54,7 +54,7 @@ def test_custom_personality_keeps_description(tmp_path):
 
 
 def test_interactive_flow_uses_locale(tmp_path):
-    answers = iter(["pt_PT", "Luna", "Pedro", "direct", "n"])
+    answers = iter(["pt_PT", "Luna", "Pedro", "direct", "n", ""])
     instance = onboarding.run_interactive(
         tmp_path / "home",
         input_fn=lambda prompt: next(answers),

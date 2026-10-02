@@ -43,7 +43,9 @@ python -m pytest -q                # tests live in tests/
 to another machine restores the companion.
 
 ```
-identity/  personality/  memory/  journal/  settings/  modules/ (future)
+identity/  personality/  memory/  journal/  settings/
+state/state.json      capabilities.json      goals/goals.json
+autonomy/autonomy.json      assets/   (visual identity travels with the companion)
 ```
 
 Changing the model only touches `settings/`, never identity, personality or
@@ -58,9 +60,11 @@ memory.
 - `context/` — context state, builder and manager.
 - `memory/` — facts, retrieval, repository and graph.
 - `journal/` — conversation and event history.
-- `model/` — one `ModelInterface`, `OllamaModelProvider` and `NoModel`.
+- `model/` — one `ModelInterface`; `OllamaModelProvider` (local),
+  `OpenAICompatibleProvider` and `AnthropicProvider` (cloud) and `NoModel`.
+  Selected by spec in `core/lyra_factory.build_model`; `cloud:` prefix = cloud.
 - `core/` — instance data, persistence, onboarding, factory, plus internal
-  state, dreams, objectives, hardware and model catalogue.
+  state, dreams, objectives, autonomy, hardware, doctor and model catalogue.
 - `capabilities/` — runtime (state, manager, executor, factory) and built-ins
   (`clock`, `calculator`, `reminder`, `weather`).
 - `interface/` — i18n, CLI, visual identity (`visual.py`) and local web GUI
@@ -82,3 +86,8 @@ assets/               (visual identity travels with the companion)
   instead of failing.
 - The guideline must gate both input and model output.
 - Tests must not require Ollama or network access.
+- Autonomy must never call the model, invent events or raise into a
+  conversation (`Brain._maintain` swallows failures on purpose).
+- Cloud API keys come from the environment only; never write them to disk.
+- `/model` switches the live backend and must update both `brain.model_interface`
+  and `brain.executor.model_interface`.

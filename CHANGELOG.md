@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.0.4 — autonomy, cloud models and easy install
+
+### Added
+
+- **Autonomous maintenance** (`core/autonomy.py`): between conversations the
+  instance reflects, consolidates repeated notes, links related memories and
+  proposes low-priority objectives. Offline, no model call, never invents
+  events, never overrides the user (VISION 18/19/28). Controlled with
+  `/autonomy on|off|run`; state in `autonomy/autonomy.json`.
+- **Cloud model backends** for weak machines:
+  `model/openai_compatible_provider.py` and `model/anthropic_provider.py`,
+  standard library only. Selected with `/model cloud:<name>`; the API key is
+  read from the environment and never stored in the instance folder.
+- **Model routing by spec** in `core/lyra_factory.py` (`build_model`,
+  `suggest_model`). Basic-profile machines are pointed at a cloud model instead
+  of a degraded local one.
+- **Environment analysis** (`core/doctor.py`): `/doctor` and `lyra --doctor`
+  report Python, Ollama, cloud key and instance-folder readiness, with the fix
+  for anything missing.
+- **Guided install** (`install.sh`, Linux first): isolated venv, `lyra`
+  launcher, optional Ollama and model pull, optional systemd user service, then
+  a doctor report.
+- **Onboarding model step**: the first run asks which model to use and suggests
+  one for the detected hardware.
+- **GUI**: `/api/models` endpoint and state-based avatar image when the instance
+  has one.
+- New commands: `/models`, `/doctor`, `/autonomy`, in en, pt_PT and pt_BR.
+- Docs: `docs/INSTALL.md`, `docs/CLOUD_MODELS.md`, `docs/AUTONOMY.md`.
+
+### Changed
+
+- `/model <name>` now switches the live backend (local or cloud) and reports
+  whether it is reachable.
+
 ## 0.0.3 — capabilities, states, dreams and a face
 
 Follows phases G to N of the alignment document (02/10/2026).

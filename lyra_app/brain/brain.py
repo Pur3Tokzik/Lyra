@@ -24,7 +24,8 @@ from lyra_app.brain.intent import Intent, detect, stable_key
 from lyra_app.capabilities.request import CapabilityRequest
 from lyra_app.capabilities.result import CapabilityStatus
 from lyra_app.context.context_manager import BasicContextManager
-from lyra_app.core import hardware
+from lyra_app.core import doctor, hardware
+from lyra_app.core.autonomy import AutonomyEngine
 from lyra_app.core.dreams import DreamEngine
 from lyra_app.core.objectives import Objectives
 from lyra_app.guideline.guideline import Guideline
@@ -48,6 +49,7 @@ class Brain:
         capability_manager=None,
         state_store=None,
         objectives=None,
+        autonomy_store=None,
     ):
         self.memory_system = memory_system
         self.model_interface = model_interface
@@ -65,6 +67,10 @@ class Brain:
         self.dream_engine = DreamEngine(
             memory_system=memory_system, journal=journal,
             locale=getattr(instance.identity, "language", "en"),
+        )
+        self.autonomy = AutonomyEngine(
+            memory_system=memory_system, journal=journal, objectives=self.objectives,
+            locale=getattr(instance.identity, "language", "en"), store=autonomy_store,
         )
         self.executor = Executor(
             memory_system=memory_system,
@@ -118,7 +124,18 @@ class Brain:
 
         self._update_state(decision.decision_type)
         self._record(text, result["text"], conversation_id)
+        self._maintain()
         return result
+
+    def _maintain(self) -> None:
+        """Let the instance keep evolving on its own, cheaply and offline."""
+        if self.autonomy is None:
+            return
+        try:
+            self.autonomy.run()
+        except Exception:
+            # Autonomy must never break a conversation.
+            pass
 
     def _update_state(self, decision_type) -> None:
         """Nudge the simulated internal state from the kind of turn it was."""
@@ -257,12 +274,7 @@ class Brain:
             if not intent.argument:
                 result["text"] = t.t("commands.model_missing")
             else:
-                if self.model_interface:
-                    self.model_interface.configure(intent.argument)
-                self.instance.settings.model_name = intent.argument
-                if self.store:
-                    self.store.save_settings(self.instance.settings)
-                result["text"] = t.t("commands.model_set", model=intent.argument)
+                result["text"] = self._switch_model(intent.argument.strip())
         elif command == "capabilities":
             if self.capability_manager is None:
                 result["text"] = t.t("capabilities.none")
@@ -324,6 +336,13 @@ class Brain:
                 model=info["model"],
                 reason=info["reason"],
             )
+        elif command == "models":
+            result["text"] = self._models_report()
+        elif command == "doctor":
+            home = self.store.home if self.store else None
+            result["text"] = self._doctor_report(home)
+        elif command == "autonomy":
+            result["text"] = self._handle_autonomy_command(intent.argument)
         elif command == "quit":
             result["quit"] = True
             result["text"] = self.executor.respond_farewell()
@@ -370,6 +389,78 @@ class Brain:
             return t.t("goals.completed", id=parts[1]) if ok else t.t("goals.not_found", id=parts[1])
         objective = self.objectives.add(argument)
         return t.t("goals.added", id=objective.id, text=objective.text)
+
+    def _switch_model(self, spec: str) -> str:
+        """Change the model backend without touching identity, memory or state."""
+        t = self.translator
+        from lyra_app.core.lyra_factory import build_model
+
+        model = build_model(spec)
+        self.model_interface = model
+        self.executor.model_interface = model
+        self.instance.settings.model_name = spec
+        if self.store:
+            self.store.save_settings(self.instance.settings)
+        available = model.is_available() if model else False
+        return t.t("commands.model_set", model=spec, status=t.t("commands.model_ready") if available else t.t("commands.model_offline"))
+
+    def _models_report(self) -> str:
+        """Show the recommended local model and how to use a cloud model."""
+        t = self.translator
+        from lyra_app.core import model_catalog
+        from lyra_app.core.lyra_factory import suggest_model
+
+        info = hardware.recommend()
+        suggestion = suggest_model()
+        current = getattr(self.instance.settings, "model_name", None) or t.t("models.none")
+        lines = [
+            t.t("models.header", profile=info["profile"]),
+            t.t("models.current", model=current),
+            t.t("models.suggested", model=suggestion),
+            t.t("models.header_catalog"),
+        ]
+        for model in model_catalog.for_profile(info["profile"]):
+            lines.append(t.t("models.line", name=model.name, size=model.size_gb, note=model.note))
+        lines.append(t.t("models.cloud_hint"))
+        return "\n".join(lines)
+
+    def _doctor_report(self, home) -> str:
+        """Report honestly what is ready and what is missing."""
+        t = self.translator
+        report = doctor.analyse(home)
+        lines = [t.t("doctor.header", profile=report.profile or "?")]
+        for check in report.checks:
+            mark = t.t("doctor.ok") if check.ok else t.t("doctor.fail")
+            line = t.t("doctor.line", mark=mark, name=check.name, detail=check.detail)
+            lines.append(line)
+            if not check.ok and check.hint:
+                lines.append(t.t("doctor.hint", hint=check.hint))
+        lines.append(t.t("doctor.recommended", model=report.recommended or "?"))
+        return "\n".join(lines)
+
+    def _handle_autonomy_command(self, argument: str) -> str:
+        """Handle ``/autonomy``, ``/autonomy on``, ``/autonomy off``, ``/autonomy run``."""
+        t = self.translator
+        if self.autonomy is None:
+            return t.t("autonomy.none")
+        verb = (argument or "").strip().split()[0].lower() if argument else ""
+        if verb in ("on", "ligar", "ativar"):
+            self.autonomy.set_enabled(True)
+            return t.t("autonomy.enabled")
+        if verb in ("off", "desligar", "desativar"):
+            self.autonomy.set_enabled(False)
+            return t.t("autonomy.disabled")
+        if verb in ("run", "correr", "agora"):
+            report = self.autonomy.run(force=True)
+            return t.t(
+                "autonomy.ran",
+                associations=report.associations,
+                consolidated=report.consolidated,
+                links=report.links,
+                proposed=report.proposed,
+            )
+        status = t.t("autonomy.on") if self.autonomy.is_enabled() else t.t("autonomy.off")
+        return t.t("autonomy.status", status=status)
 
     def _reflect(self) -> str:
         """Run one dream pass and report it honestly, without inventing events."""

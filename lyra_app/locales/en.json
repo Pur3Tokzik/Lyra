@@ -9,7 +9,8 @@
     "personality_prompt": "Personality (friendly, chill, playful, direct, custom) [friendly]: ",
     "custom_prompt": "Describe the personality in your own words: ",
     "voice_prompt": "Enable voice? (y/N): ",
-    "first_memory": "Hi {user}. I'm {name}. I'm here now, and this is my first memory of you."
+    "first_memory": "Hi {user}. I'm {name}. I'm here now, and this is my first memory of you.",
+    "model_prompt": "Which model should I use? [{model}] (press Enter to accept, or type cloud:gpt-4o-mini for a cloud model): "
   },
   "greetings": {
     "friendly": "Hi! It's really good to see you. How are you feeling today?",
@@ -73,11 +74,13 @@
     "memory_not_found": "I didn't find a memory with the key '{key}'.",
     "journal_header": "Recent journal entries:",
     "journal_empty": "The journal is empty.",
-    "model_set": "Model set to {model}. Identity, personality and memory stay the same.",
+    "model_set": "Model set to {model} ({status}). Identity, personality and memory stay the same.",
     "model_missing": "Tell me the model name, like /model llama3.",
     "unknown": "I don't know that command. Try /help.",
     "memory_set": "Saved '{key}'.",
-    "memory_set_usage": "Use /remember <key> <value>, for example /remember city Lisbon."
+    "memory_set_usage": "Use /remember <key> <value>, for example /remember city Lisbon.",
+    "model_ready": "ready",
+    "model_offline": "not reachable right now"
   },
   "errors": {
     "model_error": "Something went wrong talking to the model, so I answered as best I could without it."
@@ -136,5 +139,31 @@
     "error": "Something went wrong.",
     "state_label": "state",
     "greeting": "Hi, I'm {name}. How can I help?"
+  },
+  "models": {
+    "header": "Machine profile: {profile}",
+    "current": "Current model: {model}",
+    "suggested": "Suggested for this machine: {model}",
+    "header_catalog": "Local options for this profile:",
+    "line": "- {name} ({size} GB): {note}",
+    "cloud_hint": "Weak machine? Use a cloud model: /model cloud:gpt-4o-mini (set LYRA_CLOUD_API_KEY first).",
+    "none": "(none - reduced mode)"
+  },
+  "doctor": {
+    "header": "Environment check (profile: {profile})",
+    "ok": "[ok]",
+    "fail": "[--]",
+    "line": "{mark} {name}: {detail}",
+    "hint": "     -> {hint}",
+    "recommended": "Recommended model for this machine: {model}"
+  },
+  "autonomy": {
+    "none": "Autonomy is not available.",
+    "on": "on",
+    "off": "off",
+    "status": "Autonomous maintenance is {status}. Use /autonomy on|off|run.",
+    "enabled": "Autonomous maintenance is now on. I will keep reflecting offline.",
+    "disabled": "Autonomous maintenance is now off.",
+    "ran": "Maintenance done: {associations} associations, {consolidated} consolidated, {links} links, {proposed} proposed objectives."
   }
 }

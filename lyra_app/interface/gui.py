@@ -17,6 +17,7 @@ from pathlib import Path
 
 from lyra_app.core.ai_instance import AIInstance
 from lyra_app.core.instance import personality_label
+from lyra_app.interface import visual
 
 _TEMPLATE = Path(__file__).with_name("web") / "index.html"
 _MAX_BODY = 64 * 1024
@@ -48,7 +49,7 @@ def make_handler(instance: AIInstance):
     assets_dir = instance.store.home / "assets"
 
     class Handler(BaseHTTPRequestHandler):
-        server_version = "LyraGUI/0.0.3"
+        server_version = "LyraGUI/0.0.4"
 
         def log_message(self, *args):  # keep the console quiet
             pass
@@ -69,10 +70,30 @@ def make_handler(instance: AIInstance):
                 self._send(200, "text/html; charset=utf-8", page.encode("utf-8"))
             elif self.path == "/api/state":
                 state = instance.brain.internal_state
+                description = state.describe() if state else "steady"
+                avatar = None
+                asset = visual.VisualIdentity(assets_dir).asset_for(description)
+                if asset.exists():
+                    avatar = f"/assets/{asset.name}"
                 self._json({
-                    "state": state.describe() if state else "steady",
+                    "state": description,
                     "language": instance.data.identity.language,
                     "personality": personality_label(instance.data.personality.kind()),
+                    "avatar": avatar,
+                })
+            elif self.path == "/api/models":
+                from lyra_app.core import hardware, model_catalog
+                from lyra_app.core.lyra_factory import suggest_model
+
+                info = hardware.recommend()
+                self._json({
+                    "profile": info["profile"],
+                    "current": getattr(instance.data.settings, "model_name", None),
+                    "suggested": suggest_model(),
+                    "options": [
+                        {"name": m.name, "size_gb": m.size_gb, "note": m.note}
+                        for m in model_catalog.for_profile(info["profile"])
+                    ],
                 })
             elif self.path.startswith("/assets/"):
                 self._serve_asset(self.path[len("/assets/"):])

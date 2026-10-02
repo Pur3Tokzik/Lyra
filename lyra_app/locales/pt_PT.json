@@ -9,7 +9,8 @@
     "personality_prompt": "Personalidade (friendly, chill, playful, direct, custom) [friendly]: ",
     "custom_prompt": "Descreve a personalidade com as tuas palavras: ",
     "voice_prompt": "Ativar voz? (s/N): ",
-    "first_memory": "Olá {user}. Eu sou {name}. Estou aqui agora, e esta é a minha primeira memória de ti."
+    "first_memory": "Olá {user}. Eu sou {name}. Estou aqui agora, e esta é a minha primeira memória de ti.",
+    "model_prompt": "Que modelo devo usar? [{model}] (Enter para aceitar, ou escreve cloud:gpt-4o-mini para um modelo na nuvem): "
   },
   "greetings": {
     "friendly": "Olá! É mesmo bom ver-te. Como te sentes hoje?",
@@ -73,11 +74,13 @@
     "memory_not_found": "Não encontrei uma memória com a chave '{key}'.",
     "journal_header": "Entradas recentes do diário:",
     "journal_empty": "O diário está vazio.",
-    "model_set": "Modelo definido para {model}. Identidade, personalidade e memória continuam iguais.",
+    "model_set": "Modelo definido para {model} ({status}). Identidade, personalidade e memória mantêm-se iguais.",
     "model_missing": "Diz-me o nome do modelo, por exemplo /model llama3.",
     "unknown": "Não conheço esse comando. Tenta /help.",
     "memory_set": "Guardei '{key}'.",
-    "memory_set_usage": "Usa /lembrar <chave> <valor>, por exemplo /lembrar cidade Lisboa."
+    "memory_set_usage": "Usa /lembrar <chave> <valor>, por exemplo /lembrar cidade Lisboa.",
+    "model_ready": "pronto",
+    "model_offline": "inacessível neste momento"
   },
   "errors": {
     "model_error": "Algo correu mal a falar com o modelo, por isso respondi o melhor que consegui sem ele."
@@ -136,5 +139,31 @@
     "error": "Algo correu mal.",
     "state_label": "estado",
     "greeting": "Olá, sou a {name}. Como posso ajudar?"
+  },
+  "models": {
+    "header": "Perfil da máquina: {profile}",
+    "current": "Modelo atual: {model}",
+    "suggested": "Sugerido para esta máquina: {model}",
+    "header_catalog": "Opções locais para este perfil:",
+    "line": "- {name} ({size} GB): {note}",
+    "cloud_hint": "Máquina fraca? Usa um modelo na nuvem: /model cloud:gpt-4o-mini (define LYRA_CLOUD_API_KEY primeiro).",
+    "none": "(nenhum - modo reduzido)"
+  },
+  "doctor": {
+    "header": "Análise do ambiente (perfil: {profile})",
+    "ok": "[ok]",
+    "fail": "[--]",
+    "line": "{mark} {name}: {detail}",
+    "hint": "     -> {hint}",
+    "recommended": "Modelo recomendado para esta máquina: {model}"
+  },
+  "autonomy": {
+    "none": "A autonomia não está disponível.",
+    "on": "ligada",
+    "off": "desligada",
+    "status": "A manutenção autónoma está {status}. Usa /autonomy on|off|run.",
+    "enabled": "A manutenção autónoma está ligada. Vou continuar a refletir offline.",
+    "disabled": "A manutenção autónoma está desligada.",
+    "ran": "Manutenção feita: {associations} associações, {consolidated} consolidadas, {links} ligações, {proposed} objetivos propostos."
   }
 }
