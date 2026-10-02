@@ -56,12 +56,14 @@ _COMMANDS = {
     "capabilities": ("/capabilities", "/capacidades", "capabilities", "capacidades"),
     "state": ("/state", "/estado", "estado", "state"),
     "dreams": ("/dreams", "/sonhos", "sonhos", "dreams"),
+    "goals": ("/goals", "/objetivos", "objetivos", "goals"),
     "quit": ("/quit", "/sair", "/exit", "quit", "exit", "sair"),
 }
 _FORGET_PREFIXES = ("/forget ", "/esquecer ", "esquecer ", "forget ")
 _REMEMBER_PREFIXES = ("/remember ", "/lembrar ", "lembrar ")
 _MODEL_PREFIXES = ("/model ", "model ")
 _CAPABILITY_PREFIXES = ("/capability ", "/capacidade ", "capability ", "capacidade ")
+_GOAL_PREFIXES = ("/goal ", "/objetivo ", "goal ", "objetivo ")
 
 _EXIT = {"quit", "exit", "sair", "adeus", "tchau", "xau", "bye", "goodbye"}
 
@@ -142,6 +144,12 @@ def detect(text: str) -> IntentResult:
             if lowered.startswith(prefix):
                 return IntentResult(
                     Intent.COMMAND, command="capability",
+                    argument=stripped[len(prefix):].strip(), raw=raw,
+                )
+        for prefix in _GOAL_PREFIXES:
+            if lowered.startswith(prefix):
+                return IntentResult(
+                    Intent.COMMAND, command="goal",
                     argument=stripped[len(prefix):].strip(), raw=raw,
                 )
         first = lowered.split()[0]

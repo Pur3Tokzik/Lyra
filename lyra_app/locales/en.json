@@ -114,5 +114,14 @@
     "header": "Reflection over what I remember:",
     "association": "- association {text}",
     "question": "- open question: {text}"
+  },
+  "goals": {
+    "empty": "I have no active objectives.",
+    "header": "Active objectives:",
+    "line": "- [{id}] (priority {priority}) {text}",
+    "added": "Objective [{id}] noted: {text}",
+    "completed": "Objective [{id}] is done.",
+    "not_found": "I don't have an objective [{id}].",
+    "usage": "Usage: /goal <text>  |  /goal done <id>"
   }
 }

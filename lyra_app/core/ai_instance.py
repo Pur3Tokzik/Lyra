@@ -14,6 +14,7 @@ from lyra_app.brain.brain import Brain
 from lyra_app.capabilities.factory import build_default_manager
 from lyra_app.core.instance import InstanceData
 from lyra_app.core.internal_state import InternalStateStore
+from lyra_app.core.objectives import ObjectiveStore, Objectives
 from lyra_app.core.persistence import InstanceStore
 from lyra_app.interface.i18n import Translator, normalize_language
 from lyra_app.journal.journal import Journal
@@ -35,6 +36,7 @@ class AIInstance:
         translator: Translator,
         brain: Brain,
         capability_manager=None,
+        objectives=None,
     ):
         self.data = data
         self.store = store
@@ -44,6 +46,7 @@ class AIInstance:
         self.translator = translator
         self.brain = brain
         self.capability_manager = capability_manager
+        self.objectives = objectives
 
     # -- accessors kept for a familiar API ------------------------------
 
@@ -120,6 +123,7 @@ class AIInstance:
 
         capabilities = build_default_manager(store.home, locale=data.identity.language)
         state_store = InternalStateStore(store.home)
+        objectives = Objectives(ObjectiveStore(store.home))
         brain = Brain(
             memory_system=memory,
             model_interface=model,
@@ -129,8 +133,12 @@ class AIInstance:
             store=store,
             capability_manager=capabilities,
             state_store=state_store,
+            objectives=objectives,
         )
-        return cls(data, store, memory, journal, model, translator, brain, capabilities)
+        return cls(
+            data, store, memory, journal, model, translator, brain,
+            capabilities, objectives,
+        )
 
     # -- behaviour ------------------------------------------------------
 

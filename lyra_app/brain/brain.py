@@ -25,6 +25,7 @@ from lyra_app.capabilities.request import CapabilityRequest
 from lyra_app.capabilities.result import CapabilityStatus
 from lyra_app.context.context_manager import BasicContextManager
 from lyra_app.core.dreams import DreamEngine
+from lyra_app.core.objectives import Objectives
 from lyra_app.guideline.guideline import Guideline
 from lyra_app.interface.i18n import Translator, fold_accents
 
@@ -45,6 +46,7 @@ class Brain:
         store=None,
         capability_manager=None,
         state_store=None,
+        objectives=None,
     ):
         self.memory_system = memory_system
         self.model_interface = model_interface
@@ -55,6 +57,7 @@ class Brain:
         self.capability_manager = capability_manager
         self.state_store = state_store
         self.internal_state = state_store.load() if state_store else None
+        self.objectives = objectives or Objectives()
         self.guideline = guideline or Guideline()
         self.decision_engine = DecisionEngine()
         self.context_manager = BasicContextManager(memory_system=memory_system)
@@ -296,6 +299,19 @@ class Brain:
                 )
         elif command == "dreams":
             result["text"] = self._reflect()
+        elif command == "goals":
+            active = self.objectives.list_active()
+            if not active:
+                result["text"] = t.t("goals.empty")
+            else:
+                lines = [t.t("goals.header")]
+                for objective in active:
+                    lines.append(
+                        t.t("goals.line", id=objective.id, priority=objective.priority, text=objective.text)
+                    )
+                result["text"] = "\n".join(lines)
+        elif command == "goal":
+            result["text"] = self._handle_goal_command(intent.argument)
         elif command == "quit":
             result["quit"] = True
             result["text"] = self.executor.respond_farewell()
@@ -327,6 +343,21 @@ class Brain:
             ok = self.capability_manager.remove(name)
             return t.t("capabilities.removed", name=name) if ok else t.t("capabilities.unknown", name=name)
         return t.t("capabilities.usage")
+
+    def _handle_goal_command(self, argument: str) -> str:
+        """Handle ``/goal <text>`` and ``/goal done <id>``."""
+        t = self.translator
+        argument = (argument or "").strip()
+        if not argument:
+            return t.t("goals.usage")
+        if argument.split()[0].lower() in ("done", "concluir", "feito"):
+            parts = argument.split()
+            if len(parts) < 2:
+                return t.t("goals.usage")
+            ok = self.objectives.complete(parts[1])
+            return t.t("goals.completed", id=parts[1]) if ok else t.t("goals.not_found", id=parts[1])
+        objective = self.objectives.add(argument)
+        return t.t("goals.added", id=objective.id, text=objective.text)
 
     def _reflect(self) -> str:
         """Run one dream pass and report it honestly, without inventing events."""

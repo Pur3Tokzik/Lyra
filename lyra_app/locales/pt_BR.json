@@ -114,5 +114,14 @@
     "header": "Reflexão sobre o que me lembro:",
     "association": "- associação {text}",
     "question": "- questão em aberto: {text}"
+  },
+  "goals": {
+    "empty": "Não tenho objetivos ativos.",
+    "header": "Objetivos ativos:",
+    "line": "- [{id}] (prioridade {priority}) {text}",
+    "added": "Objetivo [{id}] registrado: {text}",
+    "completed": "O objetivo [{id}] está concluído.",
+    "not_found": "Não tenho nenhum objetivo [{id}].",
+    "usage": "Uso: /objetivo <texto>  |  /objetivo concluir <id>"
   }
 }
