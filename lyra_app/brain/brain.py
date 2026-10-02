@@ -24,6 +24,7 @@ from lyra_app.brain.intent import Intent, detect, stable_key
 from lyra_app.capabilities.request import CapabilityRequest
 from lyra_app.capabilities.result import CapabilityStatus
 from lyra_app.context.context_manager import BasicContextManager
+from lyra_app.core.dreams import DreamEngine
 from lyra_app.guideline.guideline import Guideline
 from lyra_app.interface.i18n import Translator, fold_accents
 
@@ -57,6 +58,10 @@ class Brain:
         self.guideline = guideline or Guideline()
         self.decision_engine = DecisionEngine()
         self.context_manager = BasicContextManager(memory_system=memory_system)
+        self.dream_engine = DreamEngine(
+            memory_system=memory_system, journal=journal,
+            locale=getattr(instance.identity, "language", "en"),
+        )
         self.executor = Executor(
             memory_system=memory_system,
             model_interface=model_interface,
@@ -289,6 +294,8 @@ class Brain:
                     frustration=f"{state.operational_frustration:.2f}",
                     priority=f"{state.priority:.2f}",
                 )
+        elif command == "dreams":
+            result["text"] = self._reflect()
         elif command == "quit":
             result["quit"] = True
             result["text"] = self.executor.respond_farewell()
@@ -320,6 +327,19 @@ class Brain:
             ok = self.capability_manager.remove(name)
             return t.t("capabilities.removed", name=name) if ok else t.t("capabilities.unknown", name=name)
         return t.t("capabilities.usage")
+
+    def _reflect(self) -> str:
+        """Run one dream pass and report it honestly, without inventing events."""
+        t = self.translator
+        dream = self.dream_engine.reflect()
+        if dream.is_empty():
+            return t.t("dreams.empty")
+        lines = [t.t("dreams.header")]
+        for association in dream.associations[:5]:
+            lines.append(t.t("dreams.association", text=association))
+        for question in dream.open_questions[:3]:
+            lines.append(t.t("dreams.question", text=question))
+        return "\n".join(lines)
 
     # -- journaling -----------------------------------------------------
 

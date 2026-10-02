@@ -55,6 +55,7 @@ _COMMANDS = {
     "identity": ("/identity", "/identidade", "identidade", "identity"),
     "capabilities": ("/capabilities", "/capacidades", "capabilities", "capacidades"),
     "state": ("/state", "/estado", "estado", "state"),
+    "dreams": ("/dreams", "/sonhos", "sonhos", "dreams"),
     "quit": ("/quit", "/sair", "/exit", "quit", "exit", "sair"),
 }
 _FORGET_PREFIXES = ("/forget ", "/esquecer ", "esquecer ", "forget ")

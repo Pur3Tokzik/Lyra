@@ -108,5 +108,11 @@
   "state": {
     "none": "Neste momento não tenho estados internos disponíveis.",
     "report": "Estado de funcionamento: {mood}. curiosidade {curiosity}, foco {focus}, interesse {interest}, frustração operacional {frustration}, prioridade {priority}."
+  },
+  "dreams": {
+    "empty": "Ainda não há nada para refletir. Preciso primeiro de algumas memórias.",
+    "header": "Reflexão sobre o que me lembro:",
+    "association": "- associação {text}",
+    "question": "- questão em aberto: {text}"
   }
 }

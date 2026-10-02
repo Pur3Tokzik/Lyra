@@ -108,5 +108,11 @@
   "state": {
     "none": "I don't have internal states available right now.",
     "report": "Operating state: {mood}. curiosity {curiosity}, focus {focus}, interest {interest}, operational frustration {frustration}, priority {priority}."
+  },
+  "dreams": {
+    "empty": "Nothing to reflect on yet. I need some memories first.",
+    "header": "Reflection over what I remember:",
+    "association": "- association {text}",
+    "question": "- open question: {text}"
   }
 }
