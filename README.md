@@ -116,9 +116,10 @@ the `LYRA_HOME` environment variable.
 
 ```
 /help, /memories, /remember <key> <value>, /forget <key>,
-/journal, /model <name>, /identity,
-/capabilities, /capability enable|disable|install|remove <name>,
-/state, /dreams, /goals, /goal <text>, /goal done <id>,
+/journal, /model <name>, /model pull [name], /identity, /name <new name>,
+/capabilities, /capability enable|disable|install|remove|export <name>,
+/state, /dreams, /goals, /goal <text>, /goal done|pause|resume <id>,
+/voice on|off|say <text>, /preferences [set|forget],
 /hardware, /models, /doctor, /autonomy on|off|run, /quit
 ```
 

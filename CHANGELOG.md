@@ -51,7 +51,8 @@
   (`Lyra_Documento_de_Alinhamento.docx`, section 11): removed the pasted
   "Lyra MUST ..." block glued onto REQ-064, removed the leftover conversation
   note before principle 16, and made REQ-058 and REQUIREMENTS §1 multiplatform
-  instead of Linux-only.
+  instead of Linux-only, and VISION section 33 no longer says Lyra is built
+  for Arch/CachyOS only.
 - `docs/ARCHITECTURE_DECISIONS.md` now records AD-002 (the LLM is a function, not
   the system) and AD-003 (cross-platform core, developed on Windows).
 - `docs/ARCHITECTURE_ROADMAP.md` states that `REQUIREMENTS.md` §14 sets the build
