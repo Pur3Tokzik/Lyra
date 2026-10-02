@@ -54,7 +54,8 @@ its own — simulated, and honest about it (phases G to N):
   never inventing events presented as real.
 - Objectives: internal goals with priority and status, always user-controlled.
 - Hardware profile detection and a local model recommendation.
-- Local web GUI (`--gui`) using only the standard library.
+- Local web GUI (`--gui`) using only the standard library, with a visual,
+  guided onboarding when no companion exists yet (REQ-010).
 
 And everything from 0.0.2 still holds:
 
@@ -103,7 +104,7 @@ python -m lyra_app --say "olá"     # one turn and exit
 python -m lyra_app --model llama3  # choose the Ollama model
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud model (weak machines)
 python -m lyra_app --home ./me     # choose the instance folder
-python -m lyra_app --gui           # local web GUI (http://127.0.0.1:8000)
+python -m lyra_app --gui           # local web GUI; visual onboarding if new
 python -m lyra_app --doctor        # analyse the environment and exit
 python -m lyra_app --version
 ```
@@ -127,6 +128,10 @@ Local by default. Nothing leaves your machine unless you choose a cloud model,
 and Lyra never switches to the cloud on its own. There is no telemetry, no
 account and no analytics. See `docs/CLOUD_MODELS.md` for exactly what a cloud
 model changes.
+
+## License
+
+MIT. See `LICENSE`; the project is open source and forks are welcome (REQ-005).
 
 ## Tests
 

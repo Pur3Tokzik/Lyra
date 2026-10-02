@@ -25,8 +25,8 @@ python -m lyra_app --say "olá"
 python -m lyra_app --home ./me --model llama3
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud (needs LYRA_CLOUD_API_KEY)
 python -m lyra_app --doctor        # environment check, no instance needed
-python -m lyra_app --gui           # local web GUI on :8000
-python -m pytest -q                # tests live in tests/; 143 expected
+python -m lyra_app --gui           # local web GUI on :8000 (visual onboarding if new)
+python -m pytest -q                # tests live in tests/; 149 expected
 ./install.sh --help                # installer is syntax-checked in CI
 ```
 
@@ -77,7 +77,7 @@ memory.
   install/export (`packages.py`) and built-ins (`clock`, `calculator`,
   `reminder`, `weather`, `voice`).
 - `interface/` — i18n, CLI, visual identity (`visual.py`) and local web GUI
-  (`gui.py` + `web/index.html`).
+  (`gui.py` + `web/index.html` chat and `web/onboard.html` visual onboarding).
 - `locales/` — `en`, `pt_PT`, `pt_BR`.
 
 ## Documentation map
@@ -97,6 +97,10 @@ memory.
 ## Gotchas
 
 - Language is stored in `identity`, not in settings.
+- The GUI can start before the companion exists: `serve(None, home=...)` renders
+  the visual onboarding, and `/api/onboard` creates the instance and swaps the
+  handler to the chat page. The first creation is guarded so a second request
+  never overwrites a companion.
 - `NoModel` is a real backend; the brain answers honestly in reduced mode
   instead of failing.
 - The guideline must gate both input and model output.

@@ -93,6 +93,10 @@ The first run asks for language, the companion's name, how it should address
 you, its personality, whether you want voice, and which model to use. The model
 suggestion is based on your hardware; press Enter to accept it.
 
+The same birth happens visually: `lyra --gui` opens the guided onboarding in the
+browser when no companion exists yet, and the terminal flow is used otherwise.
+Both write the same instance folder, so the companion is the same either way.
+
 ## Where things live
 
 - The companion lives in `~/.lyra` (change with `--home` or `LYRA_HOME`).

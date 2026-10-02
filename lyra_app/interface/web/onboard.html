@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="__LANG__">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --panel: rgba(20, 26, 42, 0.72);
+    --panel-border: rgba(120, 160, 255, 0.18);
+    --text: #e8ecf7;
+    --muted: #93a0c0;
+    --accent: #6ea8ff;
+    --accent-2: #9b7bff;
+    --error: #ff8a8a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(90,130,255,0.18), transparent),
+      radial-gradient(900px 500px at 100% 110%, rgba(180,90,255,0.14), transparent),
+      var(--bg);
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 40px 20px;
+  }
+  main {
+    width: 100%; max-width: 620px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 22px; padding: 30px 30px 26px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .orb {
+    width: 64px; height: 64px; border-radius: 20px; margin-bottom: 16px;
+    background: linear-gradient(145deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 34px rgba(110,168,255,0.5);
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 6px; font-weight: 650; }
+  .intro { color: var(--muted); margin: 0 0 24px; line-height: 1.5; }
+  label { display: block; font-size: .82rem; color: var(--muted); margin: 0 0 6px; }
+  .field { margin-bottom: 18px; }
+  input[type=text], select, textarea {
+    width: 100%; padding: 12px 14px; border-radius: 13px; color: var(--text);
+    background: rgba(12, 18, 32, 0.7); border: 1px solid var(--panel-border);
+    outline: none; font: inherit;
+  }
+  input[type=text]:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { min-height: 84px; resize: vertical; }
+  .hint { color: var(--muted); font-size: .74rem; margin-top: 6px; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card {
+    text-align: left; cursor: pointer; padding: 12px 14px; border-radius: 14px;
+    background: rgba(12, 18, 32, 0.6); border: 1px solid var(--panel-border);
+    color: var(--text); font: inherit;
+  }
+  .card .label { font-weight: 600; display: block; }
+  .card .desc { color: var(--muted); font-size: .74rem; margin-top: 3px; display: block; }
+  .card[aria-pressed="true"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 0 22px rgba(110,168,255,0.3);
+  }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .row label { margin: 0; color: var(--text); font-size: .9rem; }
+  button.submit {
+    width: 100%; margin-top: 8px; padding: 14px; border: none; cursor: pointer;
+    border-radius: 14px; font-weight: 700; font-size: 1rem; color: #08101f;
+    background: linear-gradient(145deg, var(--accent), var(--accent-2));
+  }
+  button.submit:disabled { opacity: .55; cursor: default; }
+  .error { color: var(--error); font-size: .84rem; margin-top: 12px; min-height: 1.1em; }
+  #custom-field { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <div class="orb"></div>
+  <h1>__TITLE__</h1>
+  <p class="intro">__INTRO__</p>
+
+  <div class="field">
+    <label for="language">__LANGUAGE_LABEL__</label>
+    <select id="language">
+      <option value="en">English</option>
+      <option value="pt_PT">Português (Portugal)</option>
+      <option value="pt_BR">Português (Brasil)</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="name">__NAME_LABEL__</label>
+    <input type="text" id="name" placeholder="__NAME_PLACEHOLDER__" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label for="address">__ADDRESS_LABEL__</label>
+    <input type="text" id="address" placeholder="__ADDRESS_PLACEHOLDER__" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label>__PERSONALITY_LABEL__</label>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <div class="field" id="custom-field">
+    <label for="custom">__CUSTOM_LABEL__</label>
+    <textarea id="custom" placeholder="__CUSTOM_PLACEHOLDER__"></textarea>
+  </div>
+
+  <div class="field row">
+    <input type="checkbox" id="voice">
+    <label for="voice">__VOICE_LABEL__</label>
+  </div>
+
+  <div class="field">
+    <label for="model">__MODEL_LABEL__</label>
+    <input type="text" id="model" autocomplete="off">
+    <div class="hint">__MODEL_HINT__</div>
+  </div>
+
+  <button class="submit" id="create" type="button">__CREATE__</button>
+  <div class="error" id="error"></div>
+</main>
+<script>
+  const PERSONALITIES = __PERSONALITIES__;
+  const T = { creating: "__CREATING__", create: "__CREATE__", error: "__ONBOARD_ERROR__" };
+  const language = document.getElementById('language');
+  const cards = document.getElementById('cards');
+  const customField = document.getElementById('custom-field');
+  const errorBox = document.getElementById('error');
+  const create = document.getElementById('create');
+  let selected = 'friendly';
+
+  language.value = "__LANG__";
+  language.addEventListener('change', () => {
+    // Re-render the page in the chosen language, keeping it a guided birth.
+    window.location = '/onboarding?lang=' + encodeURIComponent(language.value);
+  });
+
+  function renderCards() {
+    cards.innerHTML = '';
+    for (const p of PERSONALITIES) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'card';
+      btn.setAttribute('aria-pressed', String(p.value === selected));
+      const label = document.createElement('span');
+      label.className = 'label'; label.textContent = p.label;
+      const desc = document.createElement('span');
+      desc.className = 'desc'; desc.textContent = p.description;
+      btn.appendChild(label); btn.appendChild(desc);
+      btn.addEventListener('click', () => {
+        selected = p.value;
+        customField.style.display = (selected === 'custom') ? 'block' : 'none';
+        renderCards();
+      });
+      cards.appendChild(btn);
+    }
+  }
+  renderCards();
+
+  create.addEventListener('click', async () => {
+    errorBox.textContent = '';
+    const name = document.getElementById('name').value.trim();
+    if (!name) { errorBox.textContent = T.error; return; }
+    create.disabled = true;
+    create.textContent = T.creating;
+    try {
+      const res = await fetch('/api/onboard', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          language: language.value,
+          name: name,
+          address: document.getElementById('address').value,
+          personality: selected,
+          custom: document.getElementById('custom').value,
+          voice: document.getElementById('voice').checked,
+          model: document.getElementById('model').value
+        })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        window.location = '/';
+        return;
+      }
+      errorBox.textContent = data.error || T.error;
+    } catch (e) {
+      errorBox.textContent = T.error;
+    } finally {
+      create.disabled = false;
+      create.textContent = T.create;
+    }
+  });
+
+  document.getElementById('name').focus();
+</script>
+</body>
+</html>

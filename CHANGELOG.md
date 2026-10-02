@@ -30,6 +30,12 @@
   `/preferences` lists, sets and forgets.
 - **Customisable name**: `/name <new name>` changes the companion name at any
   time and persists it. "Lyra" is only the default.
+- **Visual onboarding in the GUI** (REQ-010): `lyra --gui` on a folder with no
+  companion serves a guided onboarding page (`web/onboard.html`) instead of
+  failing. It asks the same questions as the terminal flow and writes the same
+  instance folder; on creation the page switches to the chat. The onboarding page
+  is localised in en, pt_PT and pt_BR, and creating the first companion is guarded
+  so a second request never overwrites it.
 - New commands in en, pt_PT and pt_BR: `/goal pause|resume`, `/capability
   install|export`, `/voice`, `/preferences`, `/name`.
 
@@ -53,6 +59,11 @@
 - `LYRA_BRAIN.md` §14.1 makes explicit what the brain answers without a model,
   closing the gap the alignment document notes between principles 5 and 7 (which
   say "only when needed") and the lack of a concrete list.
+- Closed the three open decisions in the alignment document §12: the interface
+  order is CLI first with the GUI alongside (REQ-010, REQ-055); the instance
+  folder stays `~/.lyra`, portable and overridable (new AD-004); and the license
+  is MIT (REQ-005), stated in `README.md` and already in `LICENSE` and
+  `pyproject.toml`.
 
 ### Docs
 
