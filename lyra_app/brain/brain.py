@@ -24,6 +24,7 @@ from lyra_app.brain.intent import Intent, detect, stable_key
 from lyra_app.capabilities.request import CapabilityRequest
 from lyra_app.capabilities.result import CapabilityStatus
 from lyra_app.context.context_manager import BasicContextManager
+from lyra_app.core import hardware
 from lyra_app.core.dreams import DreamEngine
 from lyra_app.core.objectives import Objectives
 from lyra_app.guideline.guideline import Guideline
@@ -312,6 +313,17 @@ class Brain:
                 result["text"] = "\n".join(lines)
         elif command == "goal":
             result["text"] = self._handle_goal_command(intent.argument)
+        elif command == "hardware":
+            info = hardware.recommend()
+            result["text"] = t.t(
+                "hardware.report",
+                profile=info["profile"],
+                cores=info["cpu_cores"],
+                ram=info["ram_gb"],
+                gpu=t.t("hardware.yes") if info["has_gpu"] else t.t("hardware.no"),
+                model=info["model"],
+                reason=info["reason"],
+            )
         elif command == "quit":
             result["quit"] = True
             result["text"] = self.executor.respond_farewell()

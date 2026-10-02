@@ -123,5 +123,10 @@
     "completed": "Objective [{id}] is done.",
     "not_found": "I don't have an objective [{id}].",
     "usage": "Usage: /goal <text>  |  /goal done <id>"
+  },
+  "hardware": {
+    "yes": "yes",
+    "no": "no",
+    "report": "Machine profile: {profile} ({cores} cores, {ram} GB RAM, GPU: {gpu}). Recommended local model: {model} — {reason}."
   }
 }

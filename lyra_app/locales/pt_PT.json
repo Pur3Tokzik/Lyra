@@ -123,5 +123,10 @@
     "completed": "O objetivo [{id}] está concluído.",
     "not_found": "Não tenho nenhum objetivo [{id}].",
     "usage": "Uso: /objetivo <texto>  |  /objetivo concluir <id>"
+  },
+  "hardware": {
+    "yes": "sim",
+    "no": "não",
+    "report": "Perfil da máquina: {profile} ({cores} núcleos, {ram} GB RAM, GPU: {gpu}). Modelo local recomendado: {model} — {reason}."
   }
 }

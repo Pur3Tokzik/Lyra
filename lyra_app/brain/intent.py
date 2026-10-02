@@ -57,6 +57,7 @@ _COMMANDS = {
     "state": ("/state", "/estado", "estado", "state"),
     "dreams": ("/dreams", "/sonhos", "sonhos", "dreams"),
     "goals": ("/goals", "/objetivos", "objetivos", "goals"),
+    "hardware": ("/hardware", "/maquina", "/máquina", "hardware", "maquina"),
     "quit": ("/quit", "/sair", "/exit", "quit", "exit", "sair"),
 }
 _FORGET_PREFIXES = ("/forget ", "/esquecer ", "esquecer ", "forget ")
