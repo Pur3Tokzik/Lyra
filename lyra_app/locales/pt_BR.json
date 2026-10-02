@@ -67,7 +67,7 @@
   "identity_human": "Não, eu não sou humana. Sou uma companhia de IA que roda no seu computador. Não finjo o contrário.",
   "reduced_mode": "No momento não tenho um modelo de linguagem conectado, por isso não consigo responder isso livremente. Ainda cuido de comandos, memória e coisas simples. Quer ver o que eu consigo fazer?",
   "commands": {
-    "help": "Comandos: /help, /memorias, /lembrar <chave> <valor>, /esquecer <chave>, /journal, /model <nome>, /identity, /sair.",
+    "help": "Comandos: /ajuda, /memorias, /lembrar <chave> <valor>, /esquecer <chave>, /diario, /modelo <nome> (ou /modelo baixar), /identidade, /objetivos, /objetivo <texto>, /capacidade ativar|instalar|exportar, /preferencias, /nome <novo nome>, /voz, /analise, /modelos, /autonomia, /sair.",
     "memory_header": "Memórias salvas:",
     "memory_empty": "Ainda não há memórias salvas.",
     "memory_forgot": "Esqueci '{key}'.",
@@ -97,7 +97,7 @@
     "empty": "Ainda não há capacidades instaladas.",
     "header": "Capacidades disponíveis:",
     "line": "- {name} ({state}): {description}",
-    "usage": "Uso: /capacidade ativar|desativar|instalar|remover <nome>",
+    "usage": "Uso: /capacidade ativar|desativar|remover <nome>  |  /capacidade instalar <caminho>  |  /capacidade exportar <nome> [caminho]",
     "unknown": "Não conheço nenhuma capacidade chamada '{name}'.",
     "unavailable": "A capacidade '{name}' não está ativa. Você pode ligá-la com /capacidade ativar {name}.",
     "failed": "A capacidade '{name}' não conseguiu completar isso.",
@@ -106,7 +106,11 @@
     "disabled": "A capacidade '{name}' agora está desativada.",
     "installed": "A capacidade '{name}' está instalada.",
     "removed": "A capacidade '{name}' foi removida.",
-    "reminder_set": "Vou te lembrar: {text}"
+    "reminder_set": "Vou te lembrar: {text}",
+    "package_installed": "Capacidade '{name}' {version} instalada. Ative com /capacidade ativar {name}.",
+    "package_exported": "Capacidade '{name}' exportada para {path}.",
+    "package_error": "Erro no pacote de capacidade: {error}",
+    "permission_required": "A capacidade '{name}' precisa de permissão(ões): {permissions}. Conceda com LYRA_GRANTED_PERMISSIONS e tente de novo."
   },
   "state": {
     "none": "No momento não tenho estados internos disponíveis.",
@@ -125,7 +129,9 @@
     "added": "Objetivo [{id}] registrado: {text}",
     "completed": "O objetivo [{id}] está concluído.",
     "not_found": "Não tenho nenhum objetivo [{id}].",
-    "usage": "Uso: /objetivo <texto>  |  /objetivo concluir <id>"
+    "usage": "Uso: /objetivo <texto>  |  /objetivo concluir|pausar|retomar <id>",
+    "paused": "Objetivo [{id}] pausado.",
+    "resumed": "O objetivo [{id}] está ativo novamente."
   },
   "hardware": {
     "yes": "sim",
@@ -147,7 +153,10 @@
     "header_catalog": "Opções locais para este perfil:",
     "line": "- {name} ({size} GB): {note}",
     "cloud_hint": "Máquina fraca? Use um modelo na nuvem: /model cloud:gpt-4o-mini (defina LYRA_CLOUD_API_KEY antes).",
-    "none": "(nenhum - modo reduzido)"
+    "none": "(nenhum - modo reduzido)",
+    "pull_ok": "O modelo '{name}' está pronto ({detail}).",
+    "pull_failed": "Não consegui baixar '{name}': {detail}",
+    "pull_hint": "Baixe um modelo com: /model baixar [nome]"
   },
   "doctor": {
     "header": "Análise do ambiente (perfil: {profile})",
@@ -165,5 +174,25 @@
     "enabled": "A manutenção autônoma está ligada. Vou continuar refletindo offline.",
     "disabled": "A manutenção autônoma está desligada.",
     "ran": "Manutenção feita: {associations} associações, {consolidated} consolidadas, {links} ligações, {proposed} objetivos propostos."
+  },
+  "voice": {
+    "on": "Voz ligada.",
+    "off": "Voz desligada.",
+    "status": "Voz: {status} (motor: {engine})",
+    "no_engine": "nenhum motor local encontrado",
+    "said": "Dito: {text}"
+  },
+  "preferences": {
+    "empty": "Ainda não aprendi nenhuma preferência de estilo.",
+    "header": "Preferências aprendidas:",
+    "forgot": "Esqueci a preferência '{key}'.",
+    "unknown": "Não tenho a preferência '{key}'.",
+    "learned": "Preferência '{key}' definida como '{value}'.",
+    "usage": "Uso: /preferencias  |  /preferencias definir <chave> <valor>  |  /preferencias esquecer <chave>"
+  },
+  "name": {
+    "current": "Meu nome é {name}. Mude com /nome <novo nome>.",
+    "changed": "Agora meu nome é {name}.",
+    "too_long": "Esse nome é longo demais (máx. 40 caracteres)."
   }
 }

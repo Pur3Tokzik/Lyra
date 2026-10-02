@@ -8,9 +8,11 @@ This directory contains the architectural documentation for Lyra.
 - `INSTALL.md` — install, first run, uninstall.
 - `CLOUD_MODELS.md` — cloud models for weak machines.
 - `AUTONOMY.md` — how the companion keeps evolving on its own.
-- `PHASE_PLAN_0.0.5.md` — the plan of record for the next release (phases S–W).
+- `CAPABILITIES.md` — write, install and share a capability.
+- `PREFERENCES.md` — how the companion learns how you want it to behave.
+- `PHASE_PLAN_0.0.5.md` — the current release, phase by phase (phases S–X).
 - `PHASE_PLAN_0.0.4.md` — what 0.0.4 added, phase by phase.
-- `RELEASE_NOTES_0.0.4.md` — the current release notes.
+- `RELEASE_NOTES_0.0.4.md` — the previous release notes.
 - `PHASE_PLAN_0.0.3.md` — the previous arc (phases G–N).
 - `RELEASE_NOTES_0.0.3.md` — the previous release.
 - `../CONTRIBUTING.md` — how to contribute and what CI checks.
@@ -36,7 +38,7 @@ Recommended reading order:
 The design documents above were written against 0.0.1 and describe the intent
 that later phases implement. Where they name a version (`LYRA 0.0.1`, `FASE 10`,
 `FASE 11`), read it as the design baseline, not as the current release. The
-project is at 0.0.4; `CHANGELOG.md` and the phase plans track what actually
+project is at 0.0.5; `CHANGELOG.md` and the phase plans track what actually
 shipped.
 
 The documentation should be considered the source of truth for architectural decisions.

@@ -1,8 +1,13 @@
 # LYRA — Architecture Roadmap
 
 > Design baseline written at 0.0.1. Statuses below are kept current; the project
-> itself is at 0.0.4. See `../CHANGELOG.md` and `PHASE_PLAN_0.0.4.md` for what
+> itself is at 0.0.5. See `../CHANGELOG.md` and `PHASE_PLAN_0.0.5.md` for what
 > actually shipped.
+>
+> Note on ordering: this file was written before `REQUIREMENTS.md` §14, which
+> puts identity, onboarding and personality first. Where the two disagree, §14
+> wins. The phases below are therefore read as an architectural history, not as
+> the build order.
 
 ## Vision
 
@@ -189,6 +194,7 @@ Goal: Develop higher-level reasoning and planning systems.
 # Where the later work is tracked
 
 Phases 14 onward (capability runtime, perception, dreams, autonomy, model choice,
-install) are sequenced in `PHASE_PLAN_0.0.3.md` (phases G–N) and
-`PHASE_PLAN_0.0.4.md` (phases O–R). Those files are the current source of truth
+install, objectives, capability packages, voice, learned behaviour) are sequenced
+in `PHASE_PLAN_0.0.3.md` (phases G–N), `PHASE_PLAN_0.0.4.md` (phases O–R) and
+`PHASE_PLAN_0.0.5.md` (phases S–X). Those files are the current source of truth
 for what comes next.

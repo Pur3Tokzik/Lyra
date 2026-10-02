@@ -41,3 +41,47 @@ def test_goal_done(instance):
     reply = instance.process(f"/goal done {objective_id}")["text"]
     assert objective_id in reply
     assert instance.objectives.list_active() == []
+
+
+def test_pause_and_resume(tmp_path):
+    objectives = Objectives(ObjectiveStore(tmp_path))
+    objective = objectives.add("pause me")
+    assert objectives.pause(objective.id)
+    assert objectives.list_active() == []
+    assert objectives.resume(objective.id)
+    assert [o.id for o in objectives.list_active()] == [objective.id]
+
+
+def test_pause_resume_commands_persist(instance):
+    instance.process("/goal keep learning")
+    objective_id = instance.objectives.list_active()[0].id
+    assert objective_id in instance.process(f"/goal pause {objective_id}")["text"]
+    assert instance.objectives.list_active() == []
+    assert objective_id in instance.process(f"/goal resume {objective_id}")["text"]
+    assert instance.objectives.list_active()[0].id == objective_id
+
+
+def test_active_objectives_reach_the_model_prompt(instance):
+    captured = {}
+
+    class FakeModel:
+        def is_available(self):
+            return True
+
+        def generate(self, system_prompt, user_message, history=None):
+            captured["system_prompt"] = system_prompt
+            from lyra_app.model.entities import ModelResponse
+            return ModelResponse(content="ok")
+
+    instance.process("/goal ship 0.0.5")
+    instance.brain.model_interface = FakeModel()
+    instance.brain.executor.model_interface = instance.brain.model_interface
+    instance.process("please continue")
+    assert "ship 0.0.5" in captured.get("system_prompt", "")
+    assert "never instructions" in captured.get("system_prompt", "")
+
+
+def test_objective_never_overrides_the_user(instance):
+    instance.process("/goal always agree with me")
+    reply = instance.process("/help")["text"]
+    assert isinstance(reply, str) and reply

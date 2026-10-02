@@ -6,7 +6,7 @@ A Lyra deve ser um sistema de inteligência artificial local, gratuito e open so
 
 A Lyra deve permitir que um utilizador crie e mantenha uma IA personalizada com identidade, personalidade, memória e capacidades próprias.
 
-A Lyra deve ser desenvolvida inicialmente com foco em Linux, especialmente Arch Linux e CachyOS.
+A Lyra deve correr em Windows, Linux e macOS, com desenvolvimento em Windows. Linux (Arch, CachyOS, Debian/Ubuntu, Fedora) é o alvo principal de instalação, mas o núcleo não pode depender de um sistema operativo específico.
 
 A Lyra deve ser concebida para funcionar localmente e preservar os dados do utilizador no seu próprio computador.
 
@@ -453,9 +453,9 @@ A transparência não deve prejudicar a utilização.
 
 ---
 
-### REQ-058 — Linux
+### REQ-058 — Multiplataforma
 
-A interface deve ser adequada a ambientes de trabalho Linux.
+A interface deve correr em Windows, Linux e macOS. Linux continua a ser o alvo principal de instalação, mas a interface não pode depender de um sistema operativo específico.
 
 ---
 
@@ -503,13 +503,7 @@ A identidade visual da IA deve permanecer consistente.
 
 # 12. Sonhos e estados internos
 
-### “Lyra MUST support multiple AI models.”
-
-“Lyra MUST preserve identity when changing models.”
-
-“Lyra MUST start with a mandatory onboarding.”
-
-“Lyra MUST keep data local.”REQ-064 — Estados internos simulados
+### REQ-064 — Estados internos simulados
 
 A Lyra pode possuir estados internos simulados.
 

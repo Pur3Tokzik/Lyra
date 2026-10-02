@@ -26,7 +26,7 @@ python -m lyra_app --home ./me --model llama3
 python -m lyra_app --model cloud:gpt-4o-mini   # cloud (needs LYRA_CLOUD_API_KEY)
 python -m lyra_app --doctor        # environment check, no instance needed
 python -m lyra_app --gui           # local web GUI on :8000
-python -m pytest -q                # tests live in tests/; 106 expected
+python -m pytest -q                # tests live in tests/; 143 expected
 ./install.sh --help                # installer is syntax-checked in CI
 ```
 
@@ -49,7 +49,9 @@ to another machine restores the companion.
 ```
 identity/  personality/  memory/  journal/  settings/
 state/state.json      capabilities.json      goals/goals.json
-autonomy/autonomy.json      assets/   (visual identity travels with the companion)
+autonomy/autonomy.json      preferences/preferences.json
+modules/   (installed capability packages)   exports/   (shared .lyra-capability)
+assets/   (visual identity travels with the companion)
 ```
 
 Changing the model only touches `settings/`, never identity, personality or
@@ -68,9 +70,12 @@ memory.
   `OpenAICompatibleProvider` and `AnthropicProvider` (cloud) and `NoModel`.
   Selected by spec in `core/lyra_factory.build_model`; `cloud:` prefix = cloud.
 - `core/` — instance data, persistence, onboarding, factory, plus internal
-  state, dreams, objectives, autonomy, hardware, doctor and model catalogue.
-- `capabilities/` — runtime (state, manager, executor, factory) and built-ins
-  (`clock`, `calculator`, `reminder`, `weather`).
+  state, dreams, objectives, autonomy, hardware, doctor, model catalogue,
+  guided model pull (`model_pull.py`) and learned behaviour
+  (`preferences.py`).
+- `capabilities/` — runtime (state, manager, executor, factory), local package
+  install/export (`packages.py`) and built-ins (`clock`, `calculator`,
+  `reminder`, `weather`, `voice`).
 - `interface/` — i18n, CLI, visual identity (`visual.py`) and local web GUI
   (`gui.py` + `web/index.html`).
 - `locales/` — `en`, `pt_PT`, `pt_BR`.
@@ -78,10 +83,10 @@ memory.
 ## Documentation map
 
 - Current release docs: `README.md`, `docs/INSTALL.md`, `docs/CLOUD_MODELS.md`,
-  `docs/AUTONOMY.md`, `docs/PHASE_PLAN_0.0.4.md`,
-  `docs/RELEASE_NOTES_0.0.4.md`, `CHANGELOG.md`.
-- Next release plan: `docs/PHASE_PLAN_0.0.5.md` (phases S–W). The README's
-  "Still ahead" list maps one-to-one onto it; keep them in sync.
+  `docs/AUTONOMY.md`, `docs/CAPABILITIES.md`, `docs/PREFERENCES.md`,
+  `docs/PHASE_PLAN_0.0.5.md`, `CHANGELOG.md`.
+- Previous release docs: `docs/PHASE_PLAN_0.0.4.md`,
+  `docs/RELEASE_NOTES_0.0.4.md`.
 - Design baseline (written at 0.0.1, describes intent, not current state):
   `VISION.MD`, `docs/REQUIREMENTS.md`, `LYRA_BRAIN.md`, `ONBOARDING.MD`,
   `PERSONALITYBEHAVIOUR.md`, `docs/CAPABILITY_*.md`,
@@ -101,3 +106,9 @@ memory.
 - Cloud API keys come from the environment only; never write them to disk.
 - `/model` switches the live backend and must update both `brain.model_interface`
   and `brain.executor.model_interface`.
+- Learned behaviour (`core/preferences.py`) shapes style only. It is deterministic
+  and offline, never calls a model, and never overrides the user's current message
+  or the guideline.
+- Capability packages are installed locally, never fetched. A manifest that
+  declares permissions cannot be enabled until they are granted via
+  `LYRA_GRANTED_PERMISSIONS`; a broken package is skipped, never loaded.

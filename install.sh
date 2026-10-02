@@ -110,7 +110,14 @@ PY
   case "$MODEL" in
     cloud:*) warn "This machine is better served by a cloud model ($MODEL)." ;;
     *) if ask "Pull the recommended local model '$MODEL'?"; then
-         ollama pull "$MODEL"
+         # Lyra offers the pull; it never installs a model on its own (REQ-009).
+         "$VENV_DIR/bin/python" - "$MODEL" <<'PY' || warn "Model pull failed. You can retry later with: lyra, then /model pull"
+  import sys
+  from lyra_app.core import model_pull
+  result = model_pull.pull(sys.argv[1])
+  print(("  [ok] " if result.ok else "  [!!] ") + result.detail)
+  raise SystemExit(0 if result.ok else 1)
+PY
        fi ;;
   esac
 fi

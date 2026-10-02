@@ -1,5 +1,63 @@
 # Changelog
 
+## 0.0.5 — objectives, capabilities, voice and learned behaviour
+
+### Added
+
+- **Objectives that shape behaviour** (FASE S): active objectives enter the
+  context and the model system prompt, so the companion knows what it is working
+  towards. `/goal pause <id>` and `/goal resume <id>` complete the lifecycle, and
+  creating or finishing an objective is journaled. An objective biases attention;
+  it never forces an action or overrides the user (VISION 19, REQ-066).
+- **Capability packages** (FASE T, `capabilities/packages.py`): a validated
+  `capability.json` manifest and a module, installed with
+  `/capability install <path>` into the instance's `modules/` folder and shared
+  with `/capability export <name>` as a `.lyra-capability` file. Trust levels and
+  an explicit permission gate (`LYRA_GRANTED_PERMISSIONS`) before anything with
+  permissions is enabled. A broken package fails alone and is never loaded.
+- **Voice, off by default** (FASE U, `capabilities/builtin/voice.py`): text to
+  speech through a local engine (`espeak-ng`, `espeak`, `spd-say`). Registered
+  but never enabled on its own; `/voice on|off|say <text>`. With no engine it says
+  so instead of pretending. No dependency, no network.
+- **Guided model download** (FASE V, `core/model_pull.py`): `/model pull [name]`
+  and the installer offer to fetch the recommended model with `ollama pull`,
+  only after the person agrees. Lyra still never installs a model on its own
+  (REQ-009).
+- **Learned behaviour** (FASE X, `core/preferences.py`): a small, deterministic,
+  offline layer that reads how the person wants the companion to behave (tone,
+  length, formality, examples, step by step) and raises confidence on repetition.
+  It shapes style only — the user's current message always wins (VISION 6).
+  `/preferences` lists, sets and forgets.
+- **Customisable name**: `/name <new name>` changes the companion name at any
+  time and persists it. "Lyra" is only the default.
+- New commands in en, pt_PT and pt_BR: `/goal pause|resume`, `/capability
+  install|export`, `/voice`, `/preferences`, `/name`.
+
+### Changed
+
+- CI (FASE W) runs `install.sh` end to end (no Ollama, no systemd) and checks the
+  launcher, and gains an opt-in live cloud smoke test that skips without a key.
+- `examples/capabilities/hello/` is a starting point for writing a capability.
+
+### Fixed
+
+- Reconciled the design-baseline documents with the alignment document
+  (`Lyra_Documento_de_Alinhamento.docx`, section 11): removed the pasted
+  "Lyra MUST ..." block glued onto REQ-064, removed the leftover conversation
+  note before principle 16, and made REQ-058 and REQUIREMENTS §1 multiplatform
+  instead of Linux-only.
+- `docs/ARCHITECTURE_DECISIONS.md` now records AD-002 (the LLM is a function, not
+  the system) and AD-003 (cross-platform core, developed on Windows).
+- `docs/ARCHITECTURE_ROADMAP.md` states that `REQUIREMENTS.md` §14 sets the build
+  order where the two disagree, and points to the 0.0.5 phase plan.
+
+### Docs
+
+- `docs/CAPABILITIES.md` (write and share a capability), `docs/PREFERENCES.md`
+  (learned behaviour), and the 0.0.5 phase plan marked done.
+- A test now installs, enables and runs the shipped `examples/capabilities/hello`
+  package, so the example cannot rot.
+
 ## 0.0.4 — autonomy, cloud models and easy install
 
 ### Added

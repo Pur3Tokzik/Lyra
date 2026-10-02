@@ -49,7 +49,7 @@ def make_handler(instance: AIInstance):
     assets_dir = instance.store.home / "assets"
 
     class Handler(BaseHTTPRequestHandler):
-        server_version = "LyraGUI/0.0.4"
+        server_version = "LyraGUI/0.0.5"
 
         def log_message(self, *args):  # keep the console quiet
             pass

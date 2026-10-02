@@ -13,7 +13,7 @@ and does not break the phases before it.
 
 ## FASE S — Objectives that shape behaviour
 
-Status: Planned
+Status: Done
 
 Purpose:
 Objectives are stored and listed, but they do not yet influence anything. An
@@ -34,7 +34,7 @@ Deliverables:
 
 ## FASE T — Capability marketplace (local)
 
-Status: Planned
+Status: Done
 
 Purpose:
 The manager can register, install, enable and remove, but only the four
@@ -57,7 +57,7 @@ Deliverables:
 
 ## FASE U — Voice (optional, offline-first)
 
-Status: Planned
+Status: Done
 
 Purpose:
 VISION 7 makes voice optional, and `settings.voice` already exists. This phase
@@ -79,7 +79,7 @@ out of scope rather than being half-built.
 
 ## FASE V — Guided model download
 
-Status: Planned
+Status: Done
 
 Purpose:
 The doctor and onboarding suggest a model; today the user must pull it by hand.
@@ -96,7 +96,7 @@ Deliverables:
 
 ## FASE W — Close the testing gaps
 
-Status: Planned
+Status: Done
 
 Purpose:
 The README lists two things that are documented but not truly tested. This
@@ -122,6 +122,28 @@ T is independent of S; it extends the capability manager.
 U depends on T (voice ships as a capability).
 V is independent; it only touches the Ollama path and the installer.
 W depends on V (it tests the installer path V extends) and is last.
+
+## FASE X — Learned behaviour and a customisable name (done alongside S–W)
+
+Status: Done
+
+Purpose:
+Two decisions from the person using Lyra: behaviour should depend on the type of
+person and what they want, and the companion learns that behaviour; and "Lyra"
+is only a default name that must be changeable.
+
+Deliverables:
+- `core/preferences.py`: a small, deterministic, offline learned-behaviour layer.
+  It reads the person's own words (tone, length, formality, examples, step by
+  step) and raises confidence on repetition. It never guesses and never calls a
+  model.
+- Learned style enters the context and the model system prompt, and shapes style
+  only — the user's current message always wins (VISION 6, REQ-066).
+- `/preferences` (list, `set`, `forget`) so nothing is hidden.
+- `/name <new name>`: the companion name is editable at any time and persisted;
+  "Lyra" is only the default.
+- Tests: preferences persist and are visible/removable; style reaches the prompt;
+  rename persists across a reload.
 
 ## Explicitly not in 0.0.5
 

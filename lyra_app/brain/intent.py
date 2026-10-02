@@ -61,6 +61,9 @@ _COMMANDS = {
     "models": ("/models", "/modelos", "modelos", "models"),
     "doctor": ("/doctor", "/analise", "/análise", "doctor", "diagnostico"),
     "autonomy": ("/autonomy", "/autonomia", "autonomia", "autonomy"),
+    "voice": ("/voice", "/voz", "voice", "voz"),
+    "preferences": ("/preferences", "/preferencias", "/preferências", "preferencias", "preferences"),
+    "name": ("/name", "/nome", "nome", "name"),
     "quit": ("/quit", "/sair", "/exit", "quit", "exit", "sair"),
 }
 _FORGET_PREFIXES = ("/forget ", "/esquecer ", "esquecer ", "forget ")
@@ -69,6 +72,8 @@ _MODEL_PREFIXES = ("/model ", "model ")
 _CAPABILITY_PREFIXES = ("/capability ", "/capacidade ", "capability ", "capacidade ")
 _GOAL_PREFIXES = ("/goal ", "/objetivo ", "goal ", "objetivo ")
 _AUTONOMY_PREFIXES = ("/autonomy ", "/autonomia ", "autonomy ", "autonomia ")
+_PREFERENCES_PREFIXES = ("/preferences ", "/preferencias ", "/preferências ")
+_NAME_PREFIXES = ("/name ", "/nome ")
 
 _EXIT = {"quit", "exit", "sair", "adeus", "tchau", "xau", "bye", "goodbye"}
 
@@ -161,6 +166,18 @@ def detect(text: str) -> IntentResult:
             if lowered.startswith(prefix):
                 return IntentResult(
                     Intent.COMMAND, command="autonomy",
+                    argument=stripped[len(prefix):].strip(), raw=raw,
+                )
+        for prefix in _PREFERENCES_PREFIXES:
+            if lowered.startswith(prefix):
+                return IntentResult(
+                    Intent.COMMAND, command="preferences",
+                    argument=stripped[len(prefix):].strip(), raw=raw,
+                )
+        for prefix in _NAME_PREFIXES:
+            if lowered.startswith(prefix):
+                return IntentResult(
+                    Intent.COMMAND, command="name",
                     argument=stripped[len(prefix):].strip(), raw=raw,
                 )
         first = lowered.split()[0]

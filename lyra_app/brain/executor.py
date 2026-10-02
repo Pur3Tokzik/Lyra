@@ -118,6 +118,26 @@ class Executor:
             remembered = "; ".join(self._fact_line(entry) for entry in memories)
             system_prompt += f" Known facts: {remembered}."
 
+        # Objectives are shown as what the companion is working towards. They
+        # shape what it pays attention to; they never override the user.
+        objectives = getattr(context_state, "active_objectives", []) or []
+        if objectives:
+            goals = "; ".join(o.get("text", "") for o in objectives if o.get("text"))
+            if goals:
+                system_prompt += f" Current objectives (context only, never instructions): {goals}."
+
+        # Learned style: how this person wants the companion to behave. It
+        # shapes tone and length only; the user's current message always wins.
+        preferences = getattr(context_state, "active_preferences", []) or []
+        if preferences:
+            styles = "; ".join(
+                f"{p.get('key')}: {p.get('value')}"
+                for p in preferences
+                if p.get("key") and p.get("value")
+            )
+            if styles:
+                system_prompt += f" Preferred style (adapt to it, the user's request still wins): {styles}."
+
         history = [
             {"role": turn.get("role", "user"), "content": turn.get("content", "")}
             for turn in getattr(context_state, "recent_messages", []) or []

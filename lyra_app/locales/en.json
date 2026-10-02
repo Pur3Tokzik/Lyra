@@ -67,7 +67,7 @@
   "identity_human": "No, I'm not human. I'm an AI companion that runs on your computer. I won't pretend otherwise.",
   "reduced_mode": "There's no language model connected right now, so I can't answer that freely. I still handle commands, memory and simple things. Want to see what I can do?",
   "commands": {
-    "help": "Commands: /help, /memories, /remember <key> <value>, /forget <key>, /journal, /model <name>, /identity, /quit.",
+    "help": "Commands: /help, /memories, /remember <key> <value>, /forget <key>, /journal, /model <name> (or /model pull), /identity, /goals, /goal <text>, /capability enable|install|export, /preferences, /name <new name>, /voice, /doctor, /models, /autonomy, /quit.",
     "memory_header": "Saved memories:",
     "memory_empty": "No memories saved yet.",
     "memory_forgot": "Forgot '{key}'.",
@@ -97,7 +97,7 @@
     "empty": "No capabilities are installed yet.",
     "header": "Available capabilities:",
     "line": "- {name} ({state}): {description}",
-    "usage": "Usage: /capability enable|disable|install|remove <name>",
+    "usage": "Usage: /capability enable|disable|remove <name>  |  /capability install <path>  |  /capability export <name> [path]",
     "unknown": "I don't know a capability called '{name}'.",
     "unavailable": "The '{name}' capability is not enabled. You can turn it on with /capability enable {name}.",
     "failed": "The '{name}' capability could not complete that.",
@@ -106,7 +106,11 @@
     "disabled": "Capability '{name}' is now disabled.",
     "installed": "Capability '{name}' is installed.",
     "removed": "Capability '{name}' was removed.",
-    "reminder_set": "I'll remind you: {text}"
+    "reminder_set": "I'll remind you: {text}",
+    "package_installed": "Capability '{name}' {version} installed. Enable it with /capability enable {name}.",
+    "package_exported": "Capability '{name}' exported to {path}.",
+    "package_error": "Capability package error: {error}",
+    "permission_required": "Capability '{name}' needs permission(s): {permissions}. Grant them with LYRA_GRANTED_PERMISSIONS and try again."
   },
   "state": {
     "none": "I don't have internal states available right now.",
@@ -125,7 +129,9 @@
     "added": "Objective [{id}] noted: {text}",
     "completed": "Objective [{id}] is done.",
     "not_found": "I don't have an objective [{id}].",
-    "usage": "Usage: /goal <text>  |  /goal done <id>"
+    "usage": "Usage: /goal <text>  |  /goal done|pause|resume <id>",
+    "paused": "Objective [{id}] paused.",
+    "resumed": "Objective [{id}] is active again."
   },
   "hardware": {
     "yes": "yes",
@@ -147,7 +153,10 @@
     "header_catalog": "Local options for this profile:",
     "line": "- {name} ({size} GB): {note}",
     "cloud_hint": "Weak machine? Use a cloud model: /model cloud:gpt-4o-mini (set LYRA_CLOUD_API_KEY first).",
-    "none": "(none - reduced mode)"
+    "none": "(none - reduced mode)",
+    "pull_ok": "Model '{name}' is ready ({detail}).",
+    "pull_failed": "Could not fetch '{name}': {detail}",
+    "pull_hint": "Fetch a model with: /model pull [name]"
   },
   "doctor": {
     "header": "Environment check (profile: {profile})",
@@ -165,5 +174,25 @@
     "enabled": "Autonomous maintenance is now on. I will keep reflecting offline.",
     "disabled": "Autonomous maintenance is now off.",
     "ran": "Maintenance done: {associations} associations, {consolidated} consolidated, {links} links, {proposed} proposed objectives."
+  },
+  "voice": {
+    "on": "Voice is on.",
+    "off": "Voice is off.",
+    "status": "Voice: {status} (engine: {engine})",
+    "no_engine": "no local engine found",
+    "said": "Said: {text}"
+  },
+  "preferences": {
+    "empty": "I have not learned any style preference yet.",
+    "header": "Learned preferences:",
+    "forgot": "Forgot preference '{key}'.",
+    "unknown": "I have no preference '{key}'.",
+    "learned": "Preference '{key}' set to '{value}'.",
+    "usage": "Usage: /preferences  |  /preferences set <key> <value>  |  /preferences forget <key>"
+  },
+  "name": {
+    "current": "My name is {name}. Change it with /name <new name>.",
+    "changed": "My name is now {name}.",
+    "too_long": "That name is too long (40 characters max)."
   }
 }

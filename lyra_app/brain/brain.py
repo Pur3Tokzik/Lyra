@@ -15,6 +15,7 @@ mode instead of failing.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from lyra_app.brain.decision_engine import DecisionEngine
@@ -28,6 +29,7 @@ from lyra_app.core import doctor, hardware
 from lyra_app.core.autonomy import AutonomyEngine
 from lyra_app.core.dreams import DreamEngine
 from lyra_app.core.objectives import Objectives
+from lyra_app.core.preferences import Preferences
 from lyra_app.guideline.guideline import Guideline
 from lyra_app.interface.i18n import Translator, fold_accents
 
@@ -50,6 +52,7 @@ class Brain:
         state_store=None,
         objectives=None,
         autonomy_store=None,
+        preferences=None,
     ):
         self.memory_system = memory_system
         self.model_interface = model_interface
@@ -61,6 +64,7 @@ class Brain:
         self.state_store = state_store
         self.internal_state = state_store.load() if state_store else None
         self.objectives = objectives or Objectives()
+        self.preferences = preferences or Preferences(getattr(store, "home", None))
         self.guideline = guideline or Guideline()
         self.decision_engine = DecisionEngine()
         self.context_manager = BasicContextManager(memory_system=memory_system)
@@ -109,6 +113,10 @@ class Brain:
         if intent.intent == Intent.COMMAND:
             return self._handle_command(intent, result)
 
+        # Learn style from what the person says, before the turn is answered,
+        # so the same turn already respects it. Never from a command.
+        self.preferences.observe(text)
+
         context = self.context_manager.create_context(
             conversation_id=conversation_id,
             current_input=text,
@@ -117,6 +125,12 @@ class Brain:
         context.user_intent = intent.intent.value
         context.intent_metadata = intent.metadata
         context.intent_argument = intent.argument
+        # Active objectives bias attention and context; they never command.
+        context.active_preferences = self.preferences.as_context()
+        context.active_objectives = [
+            {"id": o.id, "text": o.text, "priority": o.priority}
+            for o in self.objectives.list_active()
+        ]
 
         decision = self.decision_engine.make_decision(context)
         result["decision"] = str(decision.decision_type)
@@ -124,6 +138,7 @@ class Brain:
 
         self._update_state(decision.decision_type)
         self._record(text, result["text"], conversation_id)
+        self._speak(result["text"])  # only when voice is enabled and available
         self._maintain()
         return result
 
@@ -274,7 +289,12 @@ class Brain:
             if not intent.argument:
                 result["text"] = t.t("commands.model_missing")
             else:
-                result["text"] = self._switch_model(intent.argument.strip())
+                argument = intent.argument.strip()
+                if argument.split()[0].lower() in ("pull", "descarregar", "baixar"):
+                    parts = argument.split()
+                    result["text"] = self._pull_model(parts[1] if len(parts) > 1 else "")
+                else:
+                    result["text"] = self._switch_model(argument)
         elif command == "capabilities":
             if self.capability_manager is None:
                 result["text"] = t.t("capabilities.none")
@@ -343,6 +363,12 @@ class Brain:
             result["text"] = self._doctor_report(home)
         elif command == "autonomy":
             result["text"] = self._handle_autonomy_command(intent.argument)
+        elif command == "voice":
+            result["text"] = self._handle_voice_command(intent.argument)
+        elif command == "preferences":
+            result["text"] = self._handle_preferences_command(intent.argument)
+        elif command == "name":
+            result["text"] = self._handle_name_command(intent.argument)
         elif command == "quit":
             result["quit"] = True
             result["text"] = self.executor.respond_farewell()
@@ -353,7 +379,14 @@ class Brain:
         return result
 
     def _handle_capability_command(self, argument: str) -> str:
-        """Handle ``/capability enable|disable|install|remove <name>``."""
+        """Handle ``/capability enable|disable|remove <name>`` and packages.
+
+        ``install <path>`` and ``export <name> [path]`` work on capability
+        packages (a folder or a ``.lyra-capability`` file), so a capability can
+        be shared with the community and added back later.
+        """
+        from lyra_app.capabilities import packages
+
         t = self.translator
         if self.capability_manager is None:
             return t.t("capabilities.none")
@@ -361,33 +394,88 @@ class Brain:
         if len(parts) < 2:
             return t.t("capabilities.usage")
         verb, name = parts[0].lower(), parts[1]
+
+        if verb in ("install", "instalar"):
+            home = self.store.home if self.store else None
+            if home is None:
+                return t.t("capabilities.unknown", name=name)
+            try:
+                manifest = packages.install(home, name)
+            except packages.PackageError as error:
+                return t.t("capabilities.package_error", error=str(error))
+            try:
+                capability = packages.load_capability(manifest, Path(home) / "modules" / manifest.name)
+                self.capability_manager.register(capability, manifest.metadata())
+            except packages.PackageError as error:
+                return t.t("capabilities.package_error", error=str(error))
+            if self.journal:
+                self.journal.add_important_event("capability", f"installed {manifest.name}")
+            return t.t("capabilities.package_installed", name=manifest.name, version=manifest.version)
+
+        if verb in ("export", "exportar"):
+            home = self.store.home if self.store else None
+            if home is None:
+                return t.t("capabilities.unknown", name=name)
+            destination = parts[2] if len(parts) > 2 else str(home / "exports")
+            try:
+                path = packages.export(home, name, destination)
+            except packages.PackageError as error:
+                return t.t("capabilities.package_error", error=str(error))
+            return t.t("capabilities.package_exported", name=name, path=str(path))
+
         if verb in ("enable", "ativar", "ligar"):
+            metadata = self.capability_manager.metadata(name)
+            missing = [p for p in (metadata.permissions if metadata else ()) if p]
+            if missing and not self._permission_granted(missing):
+                return t.t("capabilities.permission_required", name=name, permissions=", ".join(missing))
             ok = self.capability_manager.enable(name)
             return t.t("capabilities.enabled", name=name) if ok else t.t("capabilities.enable_failed", name=name)
         if verb in ("disable", "desativar", "desligar"):
             ok = self.capability_manager.disable(name)
             return t.t("capabilities.disabled", name=name) if ok else t.t("capabilities.unknown", name=name)
-        if verb in ("install", "instalar"):
-            ok = self.capability_manager.install(name)
-            return t.t("capabilities.installed", name=name) if ok else t.t("capabilities.unknown", name=name)
         if verb in ("remove", "remover", "uninstall"):
+            home = self.store.home if self.store else None
+            if home is not None:
+                packages.remove(home, name)
             ok = self.capability_manager.remove(name)
             return t.t("capabilities.removed", name=name) if ok else t.t("capabilities.unknown", name=name)
         return t.t("capabilities.usage")
 
+    def _permission_granted(self, permissions) -> bool:
+        """Permissions come from the environment, never from a silent default."""
+        import os
+
+        granted = {
+            p.strip()
+            for p in os.environ.get("LYRA_GRANTED_PERMISSIONS", "").split(",")
+            if p.strip()
+        }
+        return all(p in granted for p in permissions)
+
     def _handle_goal_command(self, argument: str) -> str:
-        """Handle ``/goal <text>`` and ``/goal done <id>``."""
+        """Handle ``/goal <text>``, ``/goal done|pause|resume <id>``."""
         t = self.translator
         argument = (argument or "").strip()
         if not argument:
             return t.t("goals.usage")
-        if argument.split()[0].lower() in ("done", "concluir", "feito"):
-            parts = argument.split()
-            if len(parts) < 2:
-                return t.t("goals.usage")
-            ok = self.objectives.complete(parts[1])
-            return t.t("goals.completed", id=parts[1]) if ok else t.t("goals.not_found", id=parts[1])
+        parts = argument.split()
+        verb = parts[0].lower()
+        lifecycle = {
+            "done": ("complete", "goals.completed", "concluir", "feito"),
+            "pause": ("pause", "goals.paused", "pausar", "suspender"),
+            "resume": ("resume", "goals.resumed", "retomar", "continuar"),
+        }
+        for canonical, (method, done_key, *aliases) in lifecycle.items():
+            if verb in (canonical, *aliases):
+                if len(parts) < 2:
+                    return t.t("goals.usage")
+                ok = getattr(self.objectives, method)(parts[1])
+                if ok and self.journal:
+                    self.journal.add_important_event("objective", f"{canonical} {parts[1]}")
+                return t.t(done_key, id=parts[1]) if ok else t.t("goals.not_found", id=parts[1])
         objective = self.objectives.add(argument)
+        if self.journal:
+            self.journal.add_important_event("objective", f"added {objective.id}: {objective.text}")
         return t.t("goals.added", id=objective.id, text=objective.text)
 
     def _switch_model(self, spec: str) -> str:
@@ -403,6 +491,19 @@ class Brain:
             self.store.save_settings(self.instance.settings)
         available = model.is_available() if model else False
         return t.t("commands.model_set", model=spec, status=t.t("commands.model_ready") if available else t.t("commands.model_offline"))
+
+    def _pull_model(self, name: str) -> str:
+        """Offer to fetch a model, only when the user asked for it (REQ-009)."""
+        from lyra_app.core import model_pull
+        from lyra_app.core.lyra_factory import suggest_model
+
+        t = self.translator
+        name = (name or "").strip() or suggest_model()
+        result = model_pull.pull(name)
+        if result.ok and self.journal:
+            self.journal.add_important_event("model", f"pulled {name}")
+        key = "models.pull_ok" if result.ok else "models.pull_failed"
+        return t.t(key, name=name, detail=result.detail)
 
     def _models_report(self) -> str:
         """Show the recommended local model and how to use a cloud model."""
@@ -421,6 +522,7 @@ class Brain:
         ]
         for model in model_catalog.for_profile(info["profile"]):
             lines.append(t.t("models.line", name=model.name, size=model.size_gb, note=model.note))
+        lines.append(t.t("models.pull_hint"))
         lines.append(t.t("models.cloud_hint"))
         return "\n".join(lines)
 
@@ -461,6 +563,90 @@ class Brain:
             )
         status = t.t("autonomy.on") if self.autonomy.is_enabled() else t.t("autonomy.off")
         return t.t("autonomy.status", status=status)
+
+    def _handle_voice_command(self, argument: str) -> str:
+        """Handle ``/voice``, ``/voice on``, ``/voice off``, ``/voice say <text>``."""
+        from lyra_app.capabilities.builtin.voice import find_engine
+
+        t = self.translator
+        argument = (argument or "").strip().lower()
+        if self.capability_manager is None:
+            return t.t("capabilities.none")
+        if argument in ("on", "ligar", "ativar"):
+            if find_engine() is None:
+                return t.t("voice.no_engine")
+            if not self.capability_manager.enable("voice"):
+                return t.t("voice.no_engine")
+            self.instance.settings.voice = True
+            if self.store:
+                self.store.save_settings(self.instance.settings)
+            return t.t("voice.on")
+        if argument in ("off", "desligar", "desativar"):
+            self.capability_manager.disable("voice")
+            self.instance.settings.voice = False
+            if self.store:
+                self.store.save_settings(self.instance.settings)
+            return t.t("voice.off")
+        if argument.startswith(("say ", "dizer ", "diz ")):
+            text = (argument.split(" ", 1)[1] or "").strip()
+            return self._speak(text) or t.t("voice.said", text=text)
+        engine = find_engine()
+        status = t.t("voice.on") if self.instance.settings.voice else t.t("voice.off")
+        return t.t("voice.status", status=status, engine=engine or t.t("voice.no_engine"))
+
+    def _handle_preferences_command(self, argument: str) -> str:
+        """Handle ``/preferences``, ``/preferences forget <key>`` and ``set``."""
+        t = self.translator
+        parts = (argument or "").split()
+        if parts and parts[0].lower() in ("forget", "esquecer", "apagar"):
+            if len(parts) < 2:
+                return t.t("preferences.usage")
+            ok = self.preferences.forget(parts[1])
+            return t.t("preferences.forgot", key=parts[1]) if ok else t.t("preferences.unknown", key=parts[1])
+        if parts and parts[0].lower() in ("set", "definir") and len(parts) >= 3:
+            entry = self.preferences.set(parts[1], " ".join(parts[2:]))
+            return t.t("preferences.learned", key=entry.key, value=entry.value)
+        entries = self.preferences.all()
+        if not entries:
+            return t.t("preferences.empty")
+        lines = [t.t("preferences.header")]
+        lines += [f"- {e.key}={e.value} ({e.confidence:.1f})" for e in entries]
+        return "\n".join(lines)
+
+    def _handle_name_command(self, argument: str) -> str:
+        """Handle ``/name`` and ``/name <new name>``. The name is only a default."""
+        t = self.translator
+        name = (argument or "").strip()
+        if not name:
+            return t.t("name.current", name=self.instance.identity.name)
+        if len(name) > 40:
+            return t.t("name.too_long")
+        old = self.instance.identity.name
+        self.instance.identity.name = name
+        if self.store:
+            self.store.save(self.instance)
+        self.memory_system.remember_fact("companion.name", name, importance=10)
+        if self.journal:
+            self.journal.add_important_event("identity", f"renamed {old} to {name}")
+        return t.t("name.changed", name=name)
+
+    def _speak(self, text: str) -> Optional[str]:
+        """Speak a line if voice is enabled and available. Never raises."""
+        if not getattr(self.instance.settings, "voice", False) or not text:
+            return None
+        if self.capability_manager is None or not self.capability_manager.is_available("voice"):
+            return None
+        request = CapabilityRequest(
+            request_id="voice",
+            capability_name="voice",
+            action="speak",
+            parameters={"text": text},
+        )
+        try:
+            self.capability_manager.execute(request)
+        except Exception:  # noqa: BLE001 - voice must never break a conversation
+            pass
+        return None
 
     def _reflect(self) -> str:
         """Run one dream pass and report it honestly, without inventing events."""

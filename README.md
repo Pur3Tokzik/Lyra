@@ -7,9 +7,27 @@ Lyra is the system, not the AI. The companion you create has the name you choose
 lives in a folder on your computer, and can be copied to another machine like a
 save game.
 
-## Status: 0.0.4
+## Status: 0.0.5
 
-0.0.4 makes the companion able to keep evolving on its own, and to run well on
+0.0.5 closes the gaps the 0.0.4 README listed under "Still ahead" (phases S–W),
+and adds the two things you asked for: behaviour that adapts to the person, and a
+name that is only a default.
+
+- Objectives that shape behaviour: active objectives enter the context and the
+  model prompt, with `/goal pause|resume <id>`. They bias attention; they never
+  override you.
+- Capability packages: install your own with `/capability install <path>` and
+  share one with `/capability export <name>`. Nothing is installed or enabled
+  silently, and a permission gate protects anything that declares permissions.
+- Voice, off by default: text to speech through a local engine, `/voice on|off`.
+  With no engine it says so instead of pretending.
+- Guided model download: `/model pull [name]` and the installer offer to fetch
+  the recommended model — only after you agree.
+- Learned behaviour: the companion adapts to how you want it to behave (tone,
+  length, formality). See `docs/PREFERENCES.md`.
+- Customisable name: `/name <new name>`, at any time. "Lyra" is only the default.
+
+0.0.4 made the companion able to keep evolving on its own, and to run well on
 any machine — including weak ones:
 
 - Autonomous maintenance: between conversations the instance reflects, consolidates
@@ -53,17 +71,14 @@ And everything from 0.0.2 still holds:
 
 ## Still ahead
 
-Honest list of what 0.0.4 does not do yet. Each line is scheduled in
-`docs/PHASE_PLAN_0.0.5.md`, which is the plan of record for the next release.
+Honest list of what 0.0.5 does not do yet:
 
-- Objectives are stored but do not yet shape behaviour — planned in FASE S.
-- Capabilities cannot be added by the user, only the four built-ins exist —
-  planned in FASE T.
-- Voice is a setting with no implementation; the camera stays out of scope on
-  purpose (`docs/REQUIREMENTS.md`) — voice planned in FASE U.
-- Lyra suggests a model but never fetches it — planned in FASE V.
-- `install.sh` is only syntax-checked in CI, and cloud is tested against a local
-  HTTP server rather than a live provider — planned in FASE W.
+- No remote capability registry. Sharing is by file: `/capability export` then
+  `/capability install <file>`. A hosted registry needs trust infrastructure and
+  is deliberately out of scope for now.
+- The camera stays out of scope on purpose (`docs/REQUIREMENTS.md`).
+- No embeddings or vector store: relevance stays deterministic and offline.
+- No streaming model output.
 
 ## Requirements
 
