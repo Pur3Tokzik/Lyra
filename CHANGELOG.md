@@ -50,6 +50,9 @@
   the system) and AD-003 (cross-platform core, developed on Windows).
 - `docs/ARCHITECTURE_ROADMAP.md` states that `REQUIREMENTS.md` §14 sets the build
   order where the two disagree, and points to the 0.0.5 phase plan.
+- `LYRA_BRAIN.md` §14.1 makes explicit what the brain answers without a model,
+  closing the gap the alignment document notes between principles 5 and 7 (which
+  say "only when needed") and the lack of a concrete list.
 
 ### Docs
 
